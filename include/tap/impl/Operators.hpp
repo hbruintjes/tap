@@ -48,26 +48,17 @@ inline ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, Argumen
     return right | left;
 }
 
-inline ArgumentConstraint<ConstraintType::All> operator&(Argument& left, Argument& right) {
-    return ArgumentConstraint<ConstraintType::All>(left, right);
+inline ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, Argument& right) {
+    return ArgumentConstraint<ConstraintType::Imp>(left, right);
 }
 
-inline ArgumentConstraint<ConstraintType::All> operator&(ArgumentConstraint<ConstraintType::All> left, Argument& right) {
+inline ArgumentConstraint<ConstraintType::Imp> operator>(ArgumentConstraint<ConstraintType::Imp> left, Argument& right) {
     left += right;
     return left;
 }
 
-inline ArgumentConstraint<ConstraintType::All> operator&(Argument& left, ArgumentConstraint<ConstraintType::All>& right) {
-    return right & left;
-}
-
-inline ArgumentConstraint<ConstraintType::None> operator~(Argument& arg) {
-    return ArgumentConstraint<ConstraintType::None>(arg);
-}
-
-template<ConstraintType CType>
-inline ArgumentConstraint<ConstraintType::None> operator~(ArgumentConstraint<CType>& arg) {
-    return ArgumentConstraint<ConstraintType::None>(arg);
+inline ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, ArgumentConstraint<ConstraintType::Imp>& right) {
+    return ArgumentConstraint<ConstraintType::Imp>(left) += right;
 }
 
 inline Argument& operator-(Argument& arg) {

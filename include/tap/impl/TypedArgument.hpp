@@ -101,11 +101,14 @@ inline void VariableArgument<T,multi>::set() const {
 
 template<typename T, bool multi>
 inline void VariableArgument<T,multi>::set(const std::string& value) const {
-    Argument::set();
+    // Load value
     if (!detail::setValue(value, *TypedArgument<T,multi>::m_storage)) {
         throw argument_invalid_value(*this, value);
     }
+    // Run any configured check function
     TypedArgument<T, multi>::check();
+    // Mark argument set
+    Argument::set();
 }
 
 template<typename T, bool multi>

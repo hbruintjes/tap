@@ -37,7 +37,8 @@ using TypedArgumentCheckFunc = std::function<void(const TypedArgument<T, multi>&
 
 /**
  * Base class for arguments that hold a typed value. The class can optionally be
- * set to store multiple values in a vector.
+ * set to store multiple values in a vector. The check_typed function should be
+ * used instead of check.
  * Template parameter T indicates the type of the value to store.
  * Template parameter multi indicates if multiple values should be stored.
  * Defaults to false. Note that if multi is false, but the argument can be set
@@ -137,7 +138,7 @@ public:
     /**
      * See Argument::check()
      */
-    virtual TypedArgument& check(TypedArgumentCheckFunc<T, multi> typedCheckFunc) {
+    virtual TypedArgument& check_typed(TypedArgumentCheckFunc<T, multi> typedCheckFunc) {
         m_typedCheckFunc = typedCheckFunc;
         return *this;
     }
@@ -156,9 +157,17 @@ protected:
     /**
      * See Argument::check()
      */
+    void
+    check() const override {
+        doCheck();
+    }
+
+    /**
+     * See Argument::check()
+     */
     template<bool m = multi>
     typename std::enable_if<!m>::type
-    check() const override {
+    doCheck() const {
         if (m_typedCheckFunc != nullptr) {
             m_typedCheckFunc(*this, *m_storage );
         }
@@ -169,7 +178,7 @@ protected:
      */
     template<bool m = multi>
     typename std::enable_if<m>::type
-    check() const override {
+    doCheck() const {
         if (m_typedCheckFunc != nullptr) {
             m_typedCheckFunc(*this, (*m_storage)[m_storage->size()-1] );
         }
@@ -771,6 +780,13 @@ public:
     void set() const override {
         Argument::set();
         *TypedArgument<bool, false>::m_storage = !*TypedArgument<bool, false>::m_storage;
+    }
+
+    /*
+     * See BaseArgument::operator bool()
+     */
+    explicit operator bool() const {
+        return TypedArgument<bool, false>::is_set();
     }
 
     /**

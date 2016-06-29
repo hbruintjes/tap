@@ -81,48 +81,31 @@ ArgumentConstraint<ConstraintType::Any> operator|(ArgumentConstraint<ConstraintT
 ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, ArgumentConstraint<ConstraintType::Any>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::All operator.
+ * Joins two arguments together using the ConstraintType::Imp operator.
  * @param left Left argument
  * @param right Right argument
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::All> operator&(Argument& left, Argument& right);
+ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, Argument& right);
 
 /**
- * Joins two arguments together using the ConstraintType::All operator.
+ * Joins two arguments together using the ConstraintType::Imp operator.
  * @param left Left argument
  * @param right Right argument
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::All> operator&(ArgumentConstraint<ConstraintType::All> left, Argument& right);
+ArgumentConstraint<ConstraintType::Imp> operator>(ArgumentConstraint<ConstraintType::Imp> left, Argument& right);
 
 /**
- * Joins two arguments together using the ConstraintType::All operator.
+ * Joins two arguments together using the ConstraintType::Imp operator.
  * @param left Left argument
  * @param right Right argument
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::All> operator&(Argument& left, ArgumentConstraint<ConstraintType::All>& right);
-
-/**
- * "Negates" an argument using the ConstraintType::None operator.
- * @param arg Argument to negate
- * @return An ArgumentConstraint containing the given argument, using the
- *         ConstraintType::None operator
- */
-ArgumentConstraint<ConstraintType::None> operator~(Argument& arg);
-
-/**
- * "Negates" an argument constraint using the ConstraintType::None operator.
- * @param arg Argument constraint to negate
- * @return An ArgumentConstraint containing the given argument, using the
- *         ConstraintType::None operator
- */
-template<ConstraintType CType>
-ArgumentConstraint<ConstraintType::None> operator~(ArgumentConstraint<CType>& arg);
+ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, ArgumentConstraint<ConstraintType::Imp>& right);
 
 /**
  * Makes an argument optional.

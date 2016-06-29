@@ -34,10 +34,9 @@ namespace TAP {
  * enumeration for details and meaning.
  */
 enum class ConstraintType {
-    None,   /**< 0:     No arguments may be set */
-    One,    /**< 1:     Exactly one argument must be set */
-    Any,    /**< [1,n]: At least one argument must be set */
-    All,    /**< n:     All arguments must be set */
+    Imp,   /**< 0:    Each argument implies the next */
+    One,   /**< 1:    Exactly one argument must be set */
+    Any,   /**< ?:    Manually specified */
 };
 
 /**
@@ -112,6 +111,18 @@ public:
     }
 
     /**
+     * Appends the given argument to the constraint
+     * @param arg Argument to append
+     * @return Reference to this constraint
+     */
+    ArgumentConstraint& operator+=(ArgumentConstraint<CType> const& other) {
+        for(auto const & arg: other.m_args) {
+            m_args.emplace_back(std::move(arg->clone()));
+        }
+        return *this;
+    }
+
+    /**
      * Returns the number of contained sub-arguments.
      * @return Number of contained sub-arguments.
      */
@@ -129,7 +140,7 @@ public:
     }
 
     /**
-     * See BaseArgument::set()
+     * See BaseArgument::check_valid()
      */
     void check_valid() const override;
 
@@ -156,12 +167,30 @@ public:
 
 protected:
     /**
+     * Add no arguments to the constraint. This is a simple placeholder for
+     * iterating over vararg templates.
+     * @return Reference to this ArgumentConstraint
+     */
+    ArgumentConstraint& add() {
+        return *this;
+    }
+
+    /**
      * Add an argument to the constraint.
      * @param arg Argument to add
      * @return Reference to this ArgumentConstraint
      */
     template<typename Arg>
     ArgumentConstraint& add(Arg&& arg);
+
+    /**
+     * Add multiple arguments to the constraint.
+     * @param arg Argument to add
+     * @param args Other Arguments to add
+     * @return Reference to this ArgumentConstraint
+     */
+    template<typename Arg, typename ... A>
+    ArgumentConstraint& add(Arg&& arg, A&& ... args);
 
     /**
      * Returns the number of child arguments which are set.
@@ -188,7 +217,7 @@ protected:
 };
 
 /**
- * Simple set of arguments. Acts very much like ArgumentConstraint<All>, but does
+ * Simple set of arguments. Acts very much like ArgumentConstraint<Any>, but does
  * not modify arguments on insertion. Designed to be used by the parser.
  */
 class ArgumentSet : public ArgumentConstraint<ConstraintType::Any> {
@@ -259,13 +288,13 @@ public:
     }
 
     /**
-     * Add an argument to the set.
-     * @param arg Argument to add
+     * Add arguments to the set.
+     * @param args Arguments to add
      * @return Reference to this set
      */
-    template<typename Arg>
-    ArgumentSet& add(Arg&& arg) {
-        ArgumentConstraint<ConstraintType::Any>::add(std::forward<Arg>(arg));
+    template<typename ... A>
+    ArgumentSet& add(A&& ... args) {
+        ArgumentConstraint<ConstraintType::Any>::add(std::forward<A>(args)...);
         m_updateArgs = true;
         return *this;
     }

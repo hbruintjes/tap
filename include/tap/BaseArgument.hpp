@@ -83,14 +83,22 @@ public:
     virtual void find_all_arguments(std::vector<const Argument*>& collector) const = 0;
 
     /**
-     * Boolean conversion operator (so you can do things like if (arg) { ... } )
+     * Boolean conversion operator (so you can do things like
+     * `if (arg) { ... }` ).
      * It is set to true if and only if the argument is set.
      * @return True iff the argument is set
      */
     explicit operator bool() const {
-        return count() > 0;
+        return is_set();
     }
 
+    /**
+     * Return whether the argument has been set at least once.
+     * @return True iff the argument is set
+     */
+    bool is_set() const {
+        return count() > 0;
+    }
 
     /**
      * Return the actual count of occurrences.

@@ -243,7 +243,7 @@ int main(int argc, const char* argv[]) {
  * TAP::ArgumentParser parser(left ^ right, help);
  * @endcode
  * Similarly, the OR operator (|) is defined for TAP::ConstraintType::Any, and
- * the AND operator (&) is defined for TAP::ConstraintType::All.
+ * the GREATER operator (>) is defined for TAP::ConstraintType::Imp.
  *
  * Furthermore, unary operators + and - set an argument respectively as
  * required or optional. Thus, in the above example, to require exactly left

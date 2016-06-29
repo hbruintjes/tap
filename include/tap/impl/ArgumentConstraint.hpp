@@ -56,11 +56,7 @@ template<typename ... A>
 inline ArgumentConstraint<CType>::ArgumentConstraint(A&& ... arguments) :
     BaseArgument(), m_usageString() {
     //static_assert(CType != ConstraintType::One || sizeof...(arguments) > 1, "ConstraintType::One needs at least two arguments");
-    // See http://stackoverflow.com/questions/13978916/inserting-a-variadic-argument-list-into-a-vector
-    // build temporary char array with push_back side-effect
-    detail::Temporary<char[]> { (
-            add(std::forward<A>(arguments))
-            ,'0')..., '0' };
+    add(std::forward<A>(arguments)...);
 }
 
 template<ConstraintType CType>
@@ -78,19 +74,31 @@ inline ArgumentConstraint<CType>& ArgumentConstraint<CType>::add(Arg&& arg) {
     return *this;
 }
 
+template<ConstraintType CType>
+template<typename Arg, typename ... A>
+inline ArgumentConstraint<CType>& ArgumentConstraint<CType>::add(Arg&& arg, A&& ... args) {
+   add(arg);
+   add(args...);
+
+    return *this;
+}
+
 template<>
-inline void ArgumentConstraint<ConstraintType::None>::check_valid() const {
-    std::vector<const BaseArgument*> failedArgs;
+inline void ArgumentConstraint<ConstraintType::Imp>::check_valid() const {
+    bool checkNext = false;
+    BaseArgument* lastArg = nullptr;
     for(auto const& arg: m_args) {
-        arg->check_valid();
-        if (arg->count() > 0) {
-            failedArgs.push_back(arg.get());
+        if (arg->is_set()) {
+            arg->check_valid();
         }
-    }
-    if (failedArgs.size() == 1) {
-        throw constraint_error("Cannot set the argument ", failedArgs);
-    } else if (failedArgs.size() > 1) {
-        throw constraint_error("Not allowed to set the following arguments: ", failedArgs);
+        if (checkNext && !arg->is_set()) {
+            throw constraint_error("Argument " + lastArg->usage() + " requires ", std::vector<const BaseArgument*>{arg.get()});
+        }
+        if (arg->is_set()) {
+            checkNext = true;
+        }
+
+        lastArg = arg.get();
     }
 }
 
@@ -98,12 +106,12 @@ template<>
 inline void ArgumentConstraint<ConstraintType::One>::check_valid() const {
     unsigned int counter = 0;
     for(auto const& arg: m_args) {
-        arg->check_valid();
-        if (arg->count() > 0) {
+        if (arg->is_set()) {
+            arg->check_valid();
             ++counter;
         }
     }
-    if (counter > 1 || (counter == 0 && required())) {
+    if (counter != 1) {
         std::vector<const BaseArgument*> args;
         for(auto const& arg: m_args) {
             // Copy to raw pointer vector
@@ -115,50 +123,30 @@ inline void ArgumentConstraint<ConstraintType::One>::check_valid() const {
 
 template<>
 inline void ArgumentConstraint<ConstraintType::Any>::check_valid() const {
-    unsigned int counter = 0;
+    std::vector<const BaseArgument*> failed_args;
     for(auto const& arg: m_args) {
-        arg->check_valid();
-        if (arg->count() > 0) {
-            ++counter;
+        if (arg->is_set() || arg->required()) {
+            arg->check_valid();
+        }
+
+        if (arg->required() && !arg->is_set()) {
+            failed_args.push_back(arg.get());
         }
     }
 
-    if (counter == 0 && required()) {
-        std::vector<const BaseArgument*> args;
-        for(auto const& arg: m_args) {
-            // Copy to raw pointer vector
-            args.push_back(arg.get());
-        }
-        throw constraint_error("At least one of the following arguments must be set ", args);
-    }
-}
-
-template<>
-inline void ArgumentConstraint<ConstraintType::All>::check_valid() const {
-    std::vector<const BaseArgument*> failedArgs;
-    unsigned int counter = 0;
-    for(auto const& arg: m_args) {
-        arg->check_valid();
-        if (arg->count() > 0) {
-            ++counter;
-        } else {
-            failedArgs.push_back(arg.get());
-        }
-    }
-    if (counter < size() && (counter != 0 || required())) {
-        throw constraint_error("The following arguments are missing ", failedArgs);
+    if (failed_args.size() > 0) {
+        throw constraint_error("The following requirements are missing: ", failed_args);
     }
 }
 
 template<ConstraintType CType>
 inline unsigned int ArgumentConstraint<CType>::count() const {
-    unsigned int count = 0;
     for (auto const& arg : m_args) {
-        if (arg->count() > 0) {
-            count++;
+        if (arg->is_set()) {
+            return 1;
         }
     }
-    return count;
+    return 0;
 }
 
 template<ConstraintType CType>
@@ -170,9 +158,7 @@ inline void ArgumentConstraint<CType>::diagnose_args() const {
 
 template<ConstraintType CType>
 inline std::string ArgumentConstraint<CType>::usageArgument(const Argument& arg) const {
-    if (CType == ConstraintType::None) {
-        return std::string("!") + arg.usage();
-    } else if (!arg.required() && (CType == ConstraintType::Any)) {
+    if (!arg.required() && (CType == ConstraintType::Any)) {
         return "[ " + arg.usage() + " ]";
     } else {
         return arg.usage();
@@ -182,26 +168,18 @@ inline std::string ArgumentConstraint<CType>::usageArgument(const Argument& arg)
 template<ConstraintType CType>
 template<ConstraintType ACType>
 inline std::string ArgumentConstraint<CType>::usageArgument(const ArgumentConstraint<ACType>& arg) const {
-    if (CType == ConstraintType::None) {
-        if (arg.size() > 0) {
-            return "!( " + arg.usage() + " )";
-        } else {
-            return "!" + arg.usage();
-        }
+    bool paren = (
+            (CType == ConstraintType::One) ||
+            (CType == ConstraintType::Any && ACType != ConstraintType::Any) ||
+            (ACType == ConstraintType::One)
+        );
+    if (!arg.required() && (CType == ConstraintType::Any && ACType != ConstraintType::Any)) {
+        return "[ " + arg.usage() + " ]";
+    }
+    if (paren && arg.size() > 0) {
+        return "( " + arg.usage() + " )";
     } else {
-        bool paren = (
-                (CType == ConstraintType::One) ||
-                (CType == ConstraintType::Any && ACType != ConstraintType::Any) ||
-                (CType == ConstraintType::All && ACType == ConstraintType::One)
-            );
-        if (!arg.required() && (CType == ConstraintType::Any && ACType != ConstraintType::Any)) {
-            return "[ " + arg.usage() + " ]";
-        }
-        if (paren && arg.size() > 0) {
-            return "( " + arg.usage() + " )";
-        } else {
-            return arg.usage();
-        }
+        return arg.usage();
     }
 }
 
@@ -209,11 +187,7 @@ template<typename ... A>
 ArgumentSet::ArgumentSet(const std::string& name, A&& ... args) :
     ArgumentConstraint<ConstraintType::Any>(), m_name(name) {
     set_required(false);
-    // See http://stackoverflow.com/questions/13978916/inserting-a-variadic-argument-list-into-a-vector
-    // build temporary char array with push_back side-effect
-    detail::Temporary<char[]> { (
-            add(std::forward<A>(args))
-            ,'0')..., '0' };
+    add(std::forward<A>(args)...);
 }
 
 }
