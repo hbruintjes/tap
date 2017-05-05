@@ -193,7 +193,7 @@ inline void ArgumentParser::parse(std::vector<std::string>& argv) const {
         } else if (!noParse && arg.compare(0, strlen(flagStart), flagStart) == 0 && arg != flagStart) {
             // flag argument. May be followed by other flags, or actual value
             // argument has to determine this
-            unsigned int flagIndex = strlen(flagStart);
+            size_t flagIndex = strlen(flagStart);
             for (; flagIndex < arg.length(); ++flagIndex) {
                 matchedArg = findArg(arg[flagIndex]);
 
