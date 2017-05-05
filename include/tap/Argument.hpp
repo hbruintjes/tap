@@ -25,6 +25,7 @@ freely, subject to the following restrictions:
 
 #pragma once
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 
