@@ -704,7 +704,8 @@ public:
      *        contain flag or name markers
      */
     SwitchArgument(std::string description) :
-        TypedArgument<bool, false>(std::move(description), new bool()) {
+        TypedArgument<bool, false>(std::move(description), new bool()),
+        m_ownStorage(TypedArgument<bool, false>::m_storage) {
     }
 #endif
 
@@ -716,7 +717,7 @@ public:
      */
     SwitchArgument(std::string description, char flag) :
         TypedArgument<bool, false>(std::move(description), flag, new bool()),
-        m_ownStorage(TypedArgument<bool, false>::m_storage)  {
+        m_ownStorage(TypedArgument<bool, false>::m_storage) {
     }
 
     /**
