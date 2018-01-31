@@ -168,6 +168,16 @@ public:
      */
     void parse(int argc, const char* const argv[]);
 
+    /**
+     * Parses the given argument vector (see the parsing rules in the
+     * description of the ArgumentParser class). Throws an exception if parsing
+     * fails, otherwise returns a Boolean indicating if the program should
+     * continue or stop (e.g. after displaying help).
+     * @param argv Program arguments. This vector may be modified by this
+     *             function
+     */
+    void parse(std::vector<std::string> const& argv) const;
+
 private:
     /**
      * Find positional argument (see Argument::matches()), either the first one
@@ -188,16 +198,6 @@ private:
      */
     template<typename Ident>
     const Argument* findArg(Ident ident) const;
-
-    /**
-     * Parses the given argument vector (see the parsing rules in the
-     * description of the ArgumentParser class). Throws an exception if parsing
-     * fails, otherwise returns a Boolean indicating if the program should
-     * continue or stop (e.g. after displaying help).
-     * @param argv Program arguments. This vector may be modified by this
-     *             function
-     */
-    void parse(std::vector<std::string>& argv) const;
 
     /**
      * Helper function to set the value of an Argument of which takes_value()

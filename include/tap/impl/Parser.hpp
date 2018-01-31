@@ -142,7 +142,7 @@ inline const Argument* ArgumentParser::findArg(Ident ident) const {
     return arg;
 }
 
-inline void ArgumentParser::parse(std::vector<std::string>& argv) const {
+inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
     bool noParse = false;
 
     for (auto it = argv.begin(); it != argv.end(); ++it) {
