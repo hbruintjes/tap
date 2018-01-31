@@ -401,3 +401,34 @@ const char skip[] = TAP_SKIP;
 #include "tap/impl/Parser.hpp"
 #include "tap/impl/Exceptions.hpp"
 #include "tap/impl/Operators.hpp"
+
+namespace TAP {
+	using argument = basic_argument<char>;
+	using wargument = basic_argument<wchar_t>;
+
+	template<typename T, bool multi = false>
+	using variable_argument = basic_variable_argument<char, T, multi>;
+	template<typename T, bool multi = false>
+	using wvariable_argument = basic_variable_argument<wchar_t, T, multi>;
+
+	template<typename T, bool multi = false>
+	using value_argument = basic_value_argument<char, T, multi>;
+	template<typename T, bool multi = false>
+	using wvalue_argument = basic_value_argument<wchar_t, T, multi>;
+
+	template<typename T>
+	using const_argument = basic_const_argument<char, T>;
+	template<typename T>
+	using wconst_argument = basic_const_argument<wchar_t, T>;
+
+	using switch_argument = basic_switch_argument<char>;
+	using wswitch_argument = basic_switch_argument<wchar_t>;
+
+	using argument_parser = basic_argument_parser<char>;
+	using wargument_parser = basic_argument_parser<wchar_t>;
+
+	template<constraint_type CType>
+	using argument_constraint = basic_argument_constraint<char, CType>;
+	template<constraint_type CType>
+	using wargument_constraint = basic_argument_constraint<wchar_t, CType>;
+}

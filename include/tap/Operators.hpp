@@ -19,150 +19,150 @@ freely, subject to the following restrictions:
 */
 /**
  * @file Operators.hpp
- * @brief Contains the definitions for Argument operators to create
- * ArgumentConstraints.
+ * @brief Contains the definitions for basic_argument operators to create
+ * basic_argument_constraints.
  */
 
 #pragma once
 
 namespace TAP {
 /**
- * Joins two arguments together using the ConstraintType::One operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::One operator
+ * Joins two arguments together using the constraint_type::One operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::One operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument<char_t>& left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::One operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::One operator
+ * Joins two arguments together using the constraint_type::One operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::One operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::One> operator^(ArgumentConstraint<char_t, ConstraintType::One> left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument_constraint<char_t, constraint_type::One> left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::One operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::One operator
+ * Joins two arguments together using the constraint_type::One operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::One operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::One>& right);
+basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::One>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Any operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::One operator
+ * Joins two arguments together using the constraint_type::Any operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::One operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument<char_t>& left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Any operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::Any operator
+ * Joins two arguments together using the constraint_type::Any operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::Any operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Any> operator|(ArgumentConstraint<char_t, ConstraintType::Any> left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument_constraint<char_t, constraint_type::Any> left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Any operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::Any operator
+ * Joins two arguments together using the constraint_type::Any operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::Any operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Any>& right);
+basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::Any>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Imp operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::All operator
+ * Joins two arguments together using the constraint_type::Imp operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::All operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument<char_t>& left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Imp operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::All operator
+ * Joins two arguments together using the constraint_type::Imp operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::All operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Imp> operator>(ArgumentConstraint<char_t, ConstraintType::Imp> left, Argument<char_t>& right);
+basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument_constraint<char_t, constraint_type::Imp> left, basic_argument<char_t>& right);
 
 /**
- * Joins two arguments together using the ConstraintType::Imp operator.
- * @param left Left argument
- * @param right Right argument
- * @return An ArgumentConstraint containing the given arguments, using the
- *         ConstraintType::All operator
+ * Joins two arguments together using the constraint_type::Imp operator.
+ * @param left Left basic_argument
+ * @param right Right basic_argument
+ * @return An basic_argument_constraint containing the given arguments, using the
+ *         constraint_type::All operator
  */
 template<typename char_t>
-ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Imp>& right);
+basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::Imp>& right);
 
 /**
- * Makes an argument optional.
- * @param arg Argument to make optional
- * @return input Argument
+ * Makes an basic_argument optional.
+ * @param arg basic_argument to make optional
+ * @return input basic_argument
  */
 template<typename char_t>
-Argument<char_t>& operator-(Argument<char_t>& arg);
+basic_argument<char_t>& operator-(basic_argument<char_t>& arg);
 
 /**
- * Makes an argument constraint optional.
- * @param arg Argument to make optional
- * @return input Argument
+ * Makes an basic_argument constraint optional.
+ * @param arg basic_argument to make optional
+ * @return input basic_argument
  */
-template<typename char_t, ConstraintType CType>
-ArgumentConstraint<char_t, CType>& operator-(ArgumentConstraint<char_t, CType>& arg);
+template<typename char_t, constraint_type CType>
+basic_argument_constraint<char_t, CType>& operator-(basic_argument_constraint<char_t, CType>& arg);
 
 /**
- * Makes an argument required.
- * @param arg Argument to make required
- * @return input Argument
- */
-template<typename char_t>
-Argument<char_t>& operator+(Argument<char_t>& arg);
-
-/**
- * Makes an argument required.
- * @param arg Argument to make required
- * @return input Argument
+ * Makes an basic_argument required.
+ * @param arg basic_argument to make required
+ * @return input basic_argument
  */
 template<typename char_t>
-Argument<char_t>&& operator+(Argument<char_t>&& arg);
+basic_argument<char_t>& operator+(basic_argument<char_t>& arg);
 
 /**
- * Makes an argument constraint required.
- * @param arg Argument constraint to make required
- * @return input Argument constraint
+ * Makes an basic_argument required.
+ * @param arg basic_argument to make required
+ * @return input basic_argument
  */
-template<typename char_t, ConstraintType CType>
-ArgumentConstraint<char_t, CType>& operator+(ArgumentConstraint<char_t, CType>& arg);
+template<typename char_t>
+basic_argument<char_t>&& operator+(basic_argument<char_t>&& arg);
 
 /**
- * Makes an argument constraint required.
- * @param arg Argument constraint to make required
- * @return input Argument constraint
+ * Makes an basic_argument constraint required.
+ * @param arg basic_argument constraint to make required
+ * @return input basic_argument constraint
  */
-template<typename char_t, ConstraintType CType>
-ArgumentConstraint<char_t, CType>&& operator+(ArgumentConstraint<char_t, CType>&& arg);
+template<typename char_t, constraint_type CType>
+basic_argument_constraint<char_t, CType>& operator+(basic_argument_constraint<char_t, CType>& arg);
+
+/**
+ * Makes an basic_argument constraint required.
+ * @param arg basic_argument constraint to make required
+ * @return input basic_argument constraint
+ */
+template<typename char_t, constraint_type CType>
+basic_argument_constraint<char_t, CType>&& operator+(basic_argument_constraint<char_t, CType>&& arg);
 
 }
 

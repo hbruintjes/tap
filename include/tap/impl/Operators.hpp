@@ -23,85 +23,85 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, Argument<char_t>& right) {
-    return ArgumentConstraint<char_t, ConstraintType::One>(left, right);
+inline basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument<char_t>& left, basic_argument<char_t>& right) {
+    return basic_argument_constraint<char_t, constraint_type::One>(left, right);
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::One> operator^(ArgumentConstraint<char_t, ConstraintType::One> left, Argument<char_t>& right) {
+inline basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument_constraint<char_t, constraint_type::One> left, basic_argument<char_t>& right) {
     left += right;
     return left;
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::One>& right) {
+inline basic_argument_constraint<char_t, constraint_type::One> operator^(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::One>& right) {
     return right | left;
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, Argument<char_t>& right) {
-    return ArgumentConstraint<char_t, ConstraintType::Any>(left, right);
+inline basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument<char_t>& left, basic_argument<char_t>& right) {
+    return basic_argument_constraint<char_t, constraint_type::Any>(left, right);
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Any> operator|(ArgumentConstraint<char_t, ConstraintType::Any> left, Argument<char_t>& right) {
+inline basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument_constraint<char_t, constraint_type::Any> left, basic_argument<char_t>& right) {
     left += right;
     return left;
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Any>& right) {
+inline basic_argument_constraint<char_t, constraint_type::Any> operator|(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::Any>& right) {
     return right | left;
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, Argument<char_t>& right) {
-    return ArgumentConstraint<char_t, ConstraintType::Imp>(left, right);
+inline basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument<char_t>& left, basic_argument<char_t>& right) {
+    return basic_argument_constraint<char_t, constraint_type::Imp>(left, right);
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Imp> operator>(ArgumentConstraint<char_t, ConstraintType::Imp> left, Argument<char_t>& right) {
+inline basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument_constraint<char_t, constraint_type::Imp> left, basic_argument<char_t>& right) {
     left += right;
     return left;
 }
 
 template<typename char_t>
-inline ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Imp>& right) {
-    return ArgumentConstraint<char_t, ConstraintType::Imp>(left) += right;
+inline basic_argument_constraint<char_t, constraint_type::Imp> operator>(basic_argument<char_t>& left, basic_argument_constraint<char_t, constraint_type::Imp>& right) {
+    return basic_argument_constraint<char_t, constraint_type::Imp>(left) += right;
 }
 
 template<typename char_t>
-inline Argument<char_t>& operator-(Argument<char_t>& arg) {
+inline basic_argument<char_t>& operator-(basic_argument<char_t>& arg) {
     arg.set_required(false);
     return arg;
 }
 
-template<typename char_t, ConstraintType CType>
-inline ArgumentConstraint<char_t, CType>& operator-(ArgumentConstraint<char_t, CType>& arg) {
+template<typename char_t, constraint_type CType>
+inline basic_argument_constraint<char_t, CType>& operator-(basic_argument_constraint<char_t, CType>& arg) {
     arg.set_required(false);
     return arg;
 }
 
 template<typename char_t>
-inline Argument<char_t>& operator+(Argument<char_t>& arg) {
+inline basic_argument<char_t>& operator+(basic_argument<char_t>& arg) {
     arg.set_required(true);
     return arg;
 }
 
 template<typename char_t>
-inline Argument<char_t>&& operator+(Argument<char_t>&& arg) {
+inline basic_argument<char_t>&& operator+(basic_argument<char_t>&& arg) {
     arg.set_required(true);
     return std::move(arg);
 }
 
-template<typename char_t, ConstraintType CType>
-inline ArgumentConstraint<char_t, CType>& operator+(ArgumentConstraint<char_t, CType>& arg) {
+template<typename char_t, constraint_type CType>
+inline basic_argument_constraint<char_t, CType>& operator+(basic_argument_constraint<char_t, CType>& arg) {
     arg.set_required(true);
     return arg;
 }
 
-template<typename char_t, ConstraintType CType>
-inline ArgumentConstraint<char_t, CType>&& operator+(ArgumentConstraint<char_t, CType>&& arg) {
+template<typename char_t, constraint_type CType>
+inline basic_argument_constraint<char_t, CType>&& operator+(basic_argument_constraint<char_t, CType>&& arg) {
     arg.set_required(true);
     return std::move(arg);
 }

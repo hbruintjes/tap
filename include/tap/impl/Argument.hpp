@@ -23,10 +23,10 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t>
-inline void Argument<char_t>::check_valid() const {
+inline void basic_argument<char_t>::check_valid() const {
     unsigned c = count();
     if (c == 0) {
-        if (BaseArgument<char_t>::m_required) {
+        if (base_argument<char_t>::m_required) {
             throw argument_count_mismatch(*this, c, 1);
         } else {
             return;
@@ -40,10 +40,10 @@ inline void Argument<char_t>::check_valid() const {
 }
 
 /**
- * See BaseArgument::usage()
+ * See base_argument::usage()
  */
 template<typename char_t>
-inline std::basic_string<char_t> Argument<char_t>::usage() const {
+inline std::basic_string<char_t> basic_argument<char_t>::usage() const {
     std::basic_string<char_t> usageStr;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
@@ -52,19 +52,19 @@ inline std::basic_string<char_t> Argument<char_t>::usage() const {
         usageStr = std::basic_string<char_t>(nameStart) + m_names[0];
     } else {
         // else positional, needs an override
-        throw std::logic_error("Base usage() called on positional argument");
+        throw std::logic_error("Base usage() called on positional basic_argument");
     }
 
     return usageStr;
 }
 
 /**
- * Print a string representation of this argument to the given stream. This
+ * Print a string representation of this basic_argument to the given stream. This
  * is usually represented in the first column of help text.
  * @return String representation.
  */
 template<typename char_t>
-inline std::basic_string<char_t> Argument<char_t>::ident() const {
+inline std::basic_string<char_t> basic_argument<char_t>::ident() const {
     std::basic_string<char_t> ident;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed

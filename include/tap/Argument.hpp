@@ -18,9 +18,9 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 /**
- * @file Argument.hpp
+ * @file basic_argument.hpp
  *
- * @brief Contains the definitions for regular Arguments.
+ * @brief Contains the definitions for regular arguments.
  */
 
 #pragma once
@@ -32,37 +32,37 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t>
-class Argument;
+class basic_argument;
 
-/** Function pointer that is used by Argument::check(). */
+/** Function pointer that is used by basic_argument::check(). */
 template<typename char_t>
-using ArgumentCheckFunc = std::function<void(const Argument<char_t>&)>;
+using argument_check_func = std::function<void(const basic_argument<char_t>&)>;
 
 /**
- * Simple argument class. Arguments are identified by a flag ('-a') or name
+ * Simple basic_argument class. arguments are identified by a flag ('-a') or name
  * ('--alpha'), or can be positional (only if they accept a value, see
- * ValuedArgument).
- * An Argument by default is optional (as they normally should be for most
+ * value_argument).
+ * An basic_argument by default is optional (as they normally should be for most
  * applications, makes them easier to use), but has functions to mark it
  * required.
- * By default an argument is allowed to occur only once, but can be set to occur
+ * By default an basic_argument is allowed to occur only once, but can be set to occur
  * an arbitrary amount of times.
  */
 template<typename char_t>
-class Argument: public BaseArgument<char_t> {
+class basic_argument: public base_argument<char_t> {
 protected:
     /** Flags this arguments matches */
     std::basic_string<char_t> m_flags;
-    /** Names this argument matches */
+    /** Names this basic_argument matches */
     std::vector<std::basic_string<char_t>> m_names;
 
-    /** True if used as positional argument */
+    /** True if used as positional basic_argument */
     bool m_isPositional;
 
-    /** Description or help text of argument */
+    /** Description or help text of basic_argument */
     std::basic_string<char_t> m_description;
 
-    /** Minimum number of occurrences if argument is set */
+    /** Minimum number of occurrences if basic_argument is set */
     unsigned int m_min = 1;
     /** Maximum number of occurrences. 0 means no limit */
     unsigned int m_max = 1;
@@ -71,15 +71,15 @@ protected:
     mutable std::shared_ptr<unsigned int> m_count;
 
     /** Callback for check */
-    ArgumentCheckFunc<char_t> m_checkFunc = nullptr;
+    argument_check_func<char_t> m_checkFunc = nullptr;
 
 #ifndef TAP_AUTOFLAG
     /**
-     * Create a positional argument (has no name). This function is only valid
-     * for subclasses that accept values, such as ValuedArgument.
-     * @param description Description of the argument (used in help text)
+     * Create a positional basic_argument (has no name). This function is only valid
+     * for subclasses that accept values, such as value_argument.
+     * @param description Description of the basic_argument (used in help text)
      */
-    Argument(std::basic_string<char_t> description) :
+    basic_argument(std::basic_string<char_t> description) :
             m_isPositional(true), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
     }
 #endif
@@ -90,29 +90,29 @@ public:
     ///////////////////
 #ifdef TAP_AUTOFLAG
     /**
-     * Create an argument with flag and/or name set by description. Using this
+     * Create an basic_argument with flag and/or name set by description. Using this
      * constructing with a description without a flag or name is invalid.
-     * @param description Description of the argument, requires a flag or name
+     * @param description Description of the basic_argument, requires a flag or name
      *        to be defined
      */
-    Argument(std::basic_string<char_t> description) :
+	basic_argument(std::basic_string<char_t> description) :
             m_isPositional(true), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 
         parse_description();
         // Cannot perform below check as it requires virtual calls
         // instead, user will have to make sure this does not happen
         /*if (!takes_value() && m_isPositional) {
-            throw std::logic_error("Cannot create positional argument without value");
+            throw std::logic_error("Cannot create positional basic_argument without value");
         }*/
     }
 #endif
 
     /**
-     * Create an argument that is identified by a flag.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * Create an basic_argument that is identified by a flag.
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      */
-    Argument(std::basic_string<char_t> description, char_t flag) :
+	basic_argument(std::basic_string<char_t> description, char_t flag) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -121,11 +121,11 @@ public:
     }
 
     /**
-     * Create an argument that is identified by a name.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * Create an basic_argument that is identified by a name.
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      */
-    Argument(std::basic_string<char_t> description, std::basic_string<char_t> name) :
+	basic_argument(std::basic_string<char_t> description, std::basic_string<char_t> name) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -134,12 +134,12 @@ public:
     }
 
     /**
-     * Create an argument that is identified by both a name and flag.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * Create an basic_argument that is identified by both a name and flag.
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      */
-    Argument(std::basic_string<char_t> description, char_t flag, std::basic_string<char_t> name) :
+	basic_argument(std::basic_string<char_t> description, char_t flag, std::basic_string<char_t> name) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -148,76 +148,76 @@ public:
     }
 
     /**
-     * Argument copy constructor.
+     * basic_argument copy constructor.
      */
-    Argument(const Argument&) = default;
+    basic_argument(const basic_argument&) = default;
 
     /**
-     * Argument move constructor.
+     * basic_argument move constructor.
      */
-    Argument(Argument&&) = default;
+    basic_argument(basic_argument&&) = default;
 
     /**
-     * Argument destructor.
+     * basic_argument destructor.
      */
-    virtual ~Argument() {
+    virtual ~basic_argument() {
     }
 
     /**
-     * Argument assignment operator.
+     * basic_argument assignment operator.
      */
-    Argument& operator=(const Argument& other) = default;
+    basic_argument& operator=(const basic_argument& other) = default;
 
     /**
-     * Argument move assignment operator.
+     * basic_argument move assignment operator.
      */
-    Argument& operator=(Argument&& other) = default;
+    basic_argument& operator=(basic_argument&& other) = default;
 
     /**
-     * An a flag alias for the argument.
-     * @param flag Flag alias of Argument
-     * @return Reference to this argument
+     * An a flag alias for the basic_argument.
+     * @param flag Flag alias of basic_argument
+     * @return Reference to this basic_argument
      */
-    Argument& alias(char_t flag) {
+    basic_argument& alias(char_t flag) {
         m_flags.insert(m_flags.end(), flag);
         return *this;
     }
 
     /**
-     * An a name alias for the argument.
-     * @param name Name alias of Argument
-     * @return Reference to this argument
+     * An a name alias for the basic_argument.
+     * @param name Name alias of basic_argument
+     * @return Reference to this basic_argument
      */
-    Argument& alias(std::basic_string<char_t> name) {
+    basic_argument& alias(std::basic_string<char_t> name) {
         m_names.push_back(std::move(name));
         return *this;
     }
 
     /**
-     * An both a flag and name alias for the argument.
-     * @param flag Flag alias of Argument
-     * @param name Name alias of Argument
-     * @return Reference to this argument
+     * An both a flag and name alias for the basic_argument.
+     * @param flag Flag alias of basic_argument
+     * @param name Name alias of basic_argument
+     * @return Reference to this basic_argument
      */
-    Argument& alias(char_t flag, std::basic_string<char_t> name) {
+    basic_argument& alias(char_t flag, std::basic_string<char_t> name) {
         m_flags.insert(m_flags.end(), flag);
         m_names.push_back(std::move(name));
         return *this;
     }
 
     /**
-     * Returns the description of this argument. See also description(string).
-     * @return Argument description
+     * Returns the description of this basic_argument. See also description(string).
+     * @return basic_argument description
      */
     const std::basic_string<char_t>& description() const {
         return m_description;
     }
 
     /** Set the check function to use.
-     * @param checkFunc Check function to use (see ArgumentCheckFunc)
-     * @return Reference to this argument
+     * @param checkFunc Check function to use (see argument_check_func)
+     * @return Reference to this basic_argument
      */
-    virtual Argument<char_t>& check(ArgumentCheckFunc<char_t> checkFunc) {
+    virtual basic_argument<char_t>& check(argument_check_func<char_t> checkFunc) {
         m_checkFunc = checkFunc;
         return *this;
     }
@@ -226,9 +226,9 @@ public:
     // Lookup operations
     ///////////////////
     /**
-     * Returns a pointer to this argument if it matches as a positional
-     * argument, otherwise a null-pointer.
-     * @return Either a pointer to this argument if positional, otherwise
+     * Returns a pointer to this basic_argument if it matches as a positional
+     * basic_argument, otherwise a null-pointer.
+     * @return Either a pointer to this basic_argument if positional, otherwise
      *         nullptr.
      */
     bool matches() const {
@@ -239,10 +239,10 @@ public:
     }
 
     /**
-     * Returns a pointer to this argument if it matches the given flag with any
+     * Returns a pointer to this basic_argument if it matches the given flag with any
      * alias, otherwise a null-pointer.
      * @param flag Flag to check
-     * @return Either a pointer to this argument if positional, otherwise
+     * @return Either a pointer to this basic_argument if positional, otherwise
      *         nullptr.
      */
     bool matches(char_t flag) const {
@@ -255,10 +255,10 @@ public:
     }
 
     /**
-     * Returns a pointer to this argument if it matches the given name with any
+     * Returns a pointer to this basic_argument if it matches the given name with any
      * alias, otherwise a null-pointer.
      * @param name Name to check
-     * @return Either a pointer to this argument if positional, otherwise
+     * @return Either a pointer to this basic_argument if positional, otherwise
      *         nullptr.
      */
     bool matches(const std::basic_string<char_t>& name) const {
@@ -271,26 +271,26 @@ public:
     }
 
     /**
-     * See BaseArgument::find_all_arguments()
+     * See base_argument::find_all_arguments()
      */
-    void find_all_arguments(std::vector<const Argument*>& collector) const override {
+    void find_all_arguments(std::vector<const basic_argument*>& collector) const override {
         collector.push_back(this);
     }
 
     // Make public
-    using BaseArgument<char_t>::set_required;
-    using BaseArgument<char_t>::required;
+    using base_argument<char_t>::set_required;
+    using base_argument<char_t>::required;
 
     ///////////////////
     // Count operations
     ///////////////////
     /**
-     * Allow the argument to occur multiple times or not. See also max()
+     * Allow the basic_argument to occur multiple times or not. See also max()
      * @param many If true, set the maximum number of occurrences to infinite,
      *        otherwise the current limit or 1.
-     * @return Reference to this argument
+     * @return Reference to this basic_argument
      */
-    Argument& many(bool many = true) {
+    basic_argument& many(bool many = true) {
         if (!many) {
             // Note: max of N (!=0) does not mean many
             m_max = std::max(m_max, 1u);
@@ -308,9 +308,9 @@ public:
      * Set the minimum number of required occurrences if set. If this value is
      * higher than the current maximum, the maximum is set to the same value.
      * @param min Minimum number of occurrences, must be >0
-     * @return Reference to this argument
+     * @return Reference to this basic_argument
      */
-    Argument& min(unsigned int min) {
+    basic_argument& min(unsigned int min) {
         if (min == 0) {
             throw std::logic_error("Cannot set zero minimum");
         }
@@ -322,7 +322,7 @@ public:
     }
 
     /**
-     * Returns the minimum number of occurrences of this argument for it to be
+     * Returns the minimum number of occurrences of this basic_argument for it to be
      * satisfied if set.
      * @return Minimum number of occurrences
      */
@@ -334,15 +334,15 @@ public:
      * Set the maximum number of required occurrences. This value may be 0 to
      * indicate unbounded.
      * @param max Maximum number of occurrences
-     * @return Reference to this argument
+     * @return Reference to this basic_argument
      */
-    Argument& max(unsigned int max) {
+    basic_argument& max(unsigned int max) {
         m_max = max;
         return *this;
     }
 
     /**
-     * Returns the maximum number of occurrences of this argument.
+     * Returns the maximum number of occurrences of this basic_argument.
      * @return Maximum number of occurrences
      */
     unsigned int max() const {
@@ -353,23 +353,23 @@ public:
     // value operations
     ///////////////////
     /**
-     * See BaseArgument::count()
+     * See base_argument::count()
      */
     unsigned int count() const override {
         return *m_count;
     }
 
     /**
-     * Returns whether this argument is still allowed to occur on the command
+     * Returns whether this basic_argument is still allowed to occur on the command
      * line.
-     * @return True iff the argument is still allowed to occur
+     * @return True iff the basic_argument is still allowed to occur
      */
     bool can_set() const {
         return (m_max == 0 || *m_count < m_max);
     }
 
     /**
-     * Set the argument (mark as occurred).
+     * Set the basic_argument (mark as occurred).
      */
     virtual void set() const {
         (*m_count)++;
@@ -377,9 +377,9 @@ public:
     }
 
     /**
-     * Returns whether or not this argument requires a value when it occurs
+     * Returns whether or not this basic_argument requires a value when it occurs
      * (see also set()).
-     * @return True iff the argument requires a value when set
+     * @return True iff the basic_argument requires a value when set
      */
     virtual bool takes_value() const {
         // Note: not the same as setCount < max, it is a fixed property
@@ -390,34 +390,34 @@ public:
     // Validation operations
     ///////////////////
     /**
-     * See BaseArgument::check_valid()
+     * See base_argument::check_valid()
      */
     void check_valid() const override;
 
     /**
-     * See BaseArgument::usage()
+     * See base_argument::usage()
      */
     std::basic_string<char_t> usage() const override;
 
     /**
-     * Print a string representation of this argument to the given stream. This
+     * Print a string representation of this basic_argument to the given stream. This
      * is usually represented in the first column of help text.
      * @return String representation.
      */
     virtual std::basic_string<char_t> ident() const;
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
-        return std::unique_ptr<BaseArgument<char_t>>(new Argument(*this));
+    std::unique_ptr<base_argument<char_t>> clone() const & override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_argument(*this));
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override {
-        return std::unique_ptr<BaseArgument<char_t>>(new Argument(std::move(*this)));
+    std::unique_ptr<base_argument<char_t>> clone() && override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_argument(std::move(*this)));
     }
 protected:
     /**
@@ -434,7 +434,7 @@ private:
 #ifdef TAP_AUTOFLAG
     /**
      * When TAP_AUTOFLAG is defined, this function finds flag and/or name
-     * markers in the description of the argument, and uses these to set
+     * markers in the description of the basic_argument, and uses these to set
      * aliases. Names are delimited by word boundaries, which is any
      * non-alphanumeric character. Empty names are ignored. Markers:
      * *  % : Next character is a flag
@@ -537,13 +537,13 @@ private:
  * Interface class for arguments that accept a value when takes_value() is true.
  */
 template<typename char_t>
-class ValueAcceptor {
+class value_acceptor {
 protected:
-    ~ValueAcceptor() {}
+    ~value_acceptor() {}
 public:
     /**
-     * Set the argument (mark as occurred), and assign a value to it. The
-     * parameter is a string representing the value. See also Argument::set()
+     * Set the basic_argument (mark as occurred), and assign a value to it. The
+     * parameter is a string representing the value. See also basic_argument::set()
      * @param value The value to set, as a string
      */
     virtual void set(const std::basic_string<char_t>& value) const = 0;

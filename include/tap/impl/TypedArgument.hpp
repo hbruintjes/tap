@@ -18,7 +18,7 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 /*
- * impl/ValuedArgument.hpp
+ * impl/Valuedargument.hpp
  */
 
 #pragma once
@@ -95,44 +95,44 @@ namespace detail {
 /*
     template<typename char_t>
     inline bool setValue<char_t, bool>(const std::basic_string<char_t>&, bool&) {
-        throw std::logic_error("Assigning value to unvalued argument");
+        throw std::logic_error("Assigning value to unvalued basic_argument");
     }
     */
 }
 
 template<typename char_t, typename T, bool multi>
-inline void VariableArgument<char_t, T, multi>::set() const {
-    throw std::logic_error("Calling set() on valued argument");
+inline void basic_variable_argument<char_t, T, multi>::set() const {
+    throw std::logic_error("Calling set() on valued basic_argument");
 }
 
 template<typename char_t, typename T, bool multi>
-inline void VariableArgument<char_t, T, multi>::set(const std::basic_string<char_t>& value) const {
+inline void basic_variable_argument<char_t, T, multi>::set(const std::basic_string<char_t>& value) const {
     // Load value
-    if (!detail::setValue(value, *TypedArgument<char_t, T, multi>::m_storage)) {
+    if (!detail::setValue(value, *typed_argument<char_t, T, multi>::m_storage)) {
         throw argument_invalid_value(*this, value);
     }
     // Run any configured check function
-    TypedArgument<char_t, T, multi>::check();
-    // Mark argument set
-    Argument<char_t>::set();
+    typed_argument<char_t, T, multi>::check();
+    // Mark basic_argument set
+    basic_argument<char_t>::set();
 }
 
 template<typename char_t, typename T, bool multi>
-inline std::basic_string<char_t> VariableArgument<char_t, T, multi>::usage() const {
+inline std::basic_string<char_t> basic_variable_argument<char_t, T, multi>::usage() const {
     std::basic_string<char_t> usageStr;
-    if (!Argument<char_t>::m_isPositional) {
-        if (Argument<char_t>::m_flags.length() > 0u) {
+    if (!basic_argument<char_t>::m_isPositional) {
+        if (basic_argument<char_t>::m_flags.length() > 0u) {
             // Print first flag only, aliases generally not needed
-            usageStr = std::basic_string<char_t>(flagStart) + Argument<char_t>::m_flags[0];
+            usageStr = std::basic_string<char_t>(flagStart) + basic_argument<char_t>::m_flags[0];
         } else {
-            usageStr = std::basic_string<char_t>(nameStart) + Argument<char_t>::m_names[0];
+            usageStr = std::basic_string<char_t>(nameStart) + basic_argument<char_t>::m_names[0];
         }
 
         usageStr += " ";
     }
     usageStr += m_valueName;
 
-    if (Argument<char_t>::m_isPositional && Argument<char_t>::m_max != 1) {
+    if (basic_argument<char_t>::m_isPositional && basic_argument<char_t>::m_max != 1) {
         usageStr += "...";
     }
 
@@ -140,9 +140,9 @@ inline std::basic_string<char_t> VariableArgument<char_t, T, multi>::usage() con
 }
 
 template<typename char_t, typename T, bool multi>
-inline std::basic_string<char_t> VariableArgument<char_t, T, multi>::ident() const {
-    if (!Argument<char_t>::m_isPositional) {
-        return Argument<char_t>::ident();
+inline std::basic_string<char_t> basic_variable_argument<char_t, T, multi>::ident() const {
+    if (!basic_argument<char_t>::m_isPositional) {
+        return basic_argument<char_t>::ident();
     } else {
         // Identified by just the value name
         return m_valueName;

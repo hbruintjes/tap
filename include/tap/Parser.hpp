@@ -19,7 +19,7 @@ freely, subject to the following restrictions:
 */
 /**
  * @file Parser.hpp
- * @brief Contains the definitions for the ArgumentParser.
+ * @brief Contains the definitions for the basic_argument_parser.
  */
 
 #pragma once
@@ -29,54 +29,54 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 /**
- * Argument parser class. Main job is to parse a given set of command line
- * options and feed them into a set of Argument instances, checking the
- * constraints afterwards. Arguments are identified either as a flag argument
- * (see TAP::flagStart), a named argument (see TAP::nameStart) or a positional
- * argument. If the skip marker has been defined (see TAP::skip), any argument
- * presented after this marker is treated as a positional argument. Flag
+ * basic_argument parser class. Main job is to parse a given set of command line
+ * options and feed them into a set of basic_argument instances, checking the
+ * constraints afterwards. arguments are identified either as a flag basic_argument
+ * (see TAP::flagStart), a named basic_argument (see TAP::nameStart) or a positional
+ * basic_argument. If the skip marker has been defined (see TAP::skip), any basic_argument
+ * presented after this marker is treated as a positional basic_argument. Flag
  * arguments are allowed to be joined together (e.g. '-abc' instead of
  * '-a -b -c'). The final flag is allowed to have its value attached (e.g
  * '-abvalue' is treated as '-a -b value' if '-b' accepts a value). Name
  * arguments can optionally have their value joined with a delimiter to the
- * argument itself (e.g. '--alpha=value', see TAP::nameDelim). Effectively,
+ * basic_argument itself (e.g. '--alpha=value', see TAP::nameDelim). Effectively,
  * parsing is similar to that of GNU get_opt_long(), except Perl like arguments
  * are not supported.
  */
 template<typename char_t>
-class ArgumentParser {
+class basic_argument_parser {
 protected:
-    /** Collection ArgumentSets (groups) */
-    std::vector<ArgumentSet<char_t>> m_argSets;
+    /** Collection basic_argument_sets (groups) */
+    std::vector<basic_argument_set<char_t>> m_argSets;
 
-    /** Stored argument constraints */
-    ArgumentSet<char_t> m_constraints;
+    /** Stored basic_argument constraints */
+    basic_argument_set<char_t> m_constraints;
 
     /** Program name as displayed in help text. If not set explicitly, will use
-     * the first argument of the parse function */
+     * the first basic_argument of the parse function */
     std::basic_string<char_t> m_programName;
 public:
     /**
-     * Construct a new ArgumentParser. The given list of Arguments is added to
+     * Construct a new basic_argument_parser. The given list of arguments is added to
      * the parser immediately. Does not generate help text.
-     * @param args Arguments (or constraints) to add
+     * @param args arguments (or constraints) to add
      */
     template<typename... Args>
-    ArgumentParser(Args&&... args);
+    basic_argument_parser(Args&&... args);
 
     /**
-     * ArgumentParser destructor.
+     * basic_argument_parser destructor.
      */
-    virtual ~ArgumentParser() {
+    virtual ~basic_argument_parser() {
     }
 
     /**
      * Set the program name. This name is used in the usage string when
-     * displaying help. If not set, the first argument from calling parse()
+     * displaying help. If not set, the first basic_argument from calling parse()
      * is used instead.
-     * @return Reference to this ArgumentParser
+     * @return Reference to this basic_argument_parser
      */
-    ArgumentParser& program_name(const std::basic_string<char_t>& programName) {
+    basic_argument_parser& program_name(const std::basic_string<char_t>& programName) {
         m_programName = programName;
         return *this;
     }
@@ -91,62 +91,62 @@ public:
 
     /**
      * Add all given arguments, or constraints, to the parser.
-     * @param args Arguments to add
-     * @return Reference to this ArgumentParser
+     * @param args arguments to add
+     * @return Reference to this basic_argument_parser
      */
     template<typename... Args>
-    ArgumentParser& addAll(Args&&... args);
+    basic_argument_parser& addAll(Args&&... args);
 
     /**
-     * Add the given argument, or constraint, to the parser.
-     * @param arg Argument to add
-     * @return Reference to this ArgumentParser
+     * Add the given basic_argument, or constraint, to the parser.
+     * @param arg basic_argument to add
+     * @return Reference to this basic_argument_parser
      */
     template<typename Arg>
-    ArgumentParser& add(Arg&& arg);
+    basic_argument_parser& add(Arg&& arg);
 
     /**
-     * Add the given ArgumentSet to the parser.
-     * @param argSet ArgumentSet to add
-     * @return Reference to this ArgumentParser
+     * Add the given basic_argument_set to the parser.
+     * @param argSet basic_argument_set to add
+     * @return Reference to this basic_argument_parser
      */
-    ArgumentParser& add(ArgumentSet<char_t> argSet);
+    basic_argument_parser& add(basic_argument_set<char_t> argSet);
 
     /**
      * Add the given constraint, to the parser. Constraints are not shown in
-     * the help, but are checked. Argument instances in the constraint must
-     * have been added before as a regular argument for the parser to
+     * the help, but are checked. basic_argument instances in the constraint must
+     * have been added before as a regular basic_argument for the parser to
      * recognize them (see add()).
-     * @param constr Argument constraint to add
-     * @return Reference to this ArgumentParser
+     * @param constr basic_argument constraint to add
+     * @return Reference to this basic_argument_parser
      */
     template<typename Arg>
-    ArgumentParser& addConstraint(Arg&& constr);
+    basic_argument_parser& addConstraint(Arg&& constr);
 
     /**
-     * Get the Argument given the flag. If the Argument is not contained
+     * Get the basic_argument given the flag. If the basic_argument is not contained
      * exactly once, behavior is undefined.
-     * @param flag Flag to search Argument by
-     * @return The Argument that matches the flag
+     * @param flag Flag to search basic_argument by
+     * @return The basic_argument that matches the flag
      */
-    const Argument<char_t>& operator[](char_t flag) const {
+    const basic_argument<char_t>& operator[](char_t flag) const {
         auto arg = findArg(flag);
         if (arg == nullptr) {
-            throw std::out_of_range("Argument not found");
+            throw std::out_of_range("basic_argument not found");
         }
         return *arg;
     }
 
     /**
-     * Get the Argument given the flag. If the Argument is not contained
+     * Get the basic_argument given the flag. If the basic_argument is not contained
      * exactly once, behavior is undefined.
-     * @param name Name to search Argument by
-     * @return The Argument that matches the name
+     * @param name Name to search basic_argument by
+     * @return The basic_argument that matches the name
      */
-    const Argument<char_t>& operator[](const std::basic_string<char_t>& name) const {
+    const basic_argument<char_t>& operator[](const std::basic_string<char_t>& name) const {
         auto arg = findArg(name);
         if (arg == nullptr) {
-            throw std::out_of_range("Argument not found");
+            throw std::out_of_range("basic_argument not found");
         }
         return *arg;
     }
@@ -160,7 +160,7 @@ public:
 
     /**
      * Parses the given arguments as they are presented on main() (see the
-     * parsing rules in the description of the ArgumentParser class). Throws an
+     * parsing rules in the description of the basic_argument_parser class). Throws an
      * exception if parsing fails, otherwise returns a boolean indicating if the
      * program should continue or stop (e.g. after displaying help).
      * @param argc Number of items in the argv array
@@ -170,8 +170,8 @@ public:
     void parse(int argc, const char_t* const argv[]);
 
     /**
-     * Parses the given argument vector (see the parsing rules in the
-     * description of the ArgumentParser class). Throws an exception if parsing
+     * Parses the given basic_argument vector (see the parsing rules in the
+     * description of the basic_argument_parser class). Throws an exception if parsing
      * fails, otherwise returns a Boolean indicating if the program should
      * continue or stop (e.g. after displaying help).
      * @param argv Program arguments. This vector may be modified by this
@@ -181,32 +181,32 @@ public:
 
 private:
     /**
-     * Find positional argument (see Argument::matches()), either the first one
+     * Find positional basic_argument (see basic_argument::matches()), either the first one
      * that can be set, or the last one that matches. Returns a null-pointer if
      * not found.
-     * @return First matching argument that can be set, last matching argument
+     * @return First matching basic_argument that can be set, last matching basic_argument
      *         if none can be set, or nullptr if no matching arguments
      */
-    const Argument<char_t>* findArg() const;
+    const basic_argument<char_t>* findArg() const;
 
     /**
-     * Find the argument matching the given parameter (see
-     * Argument::matches()), either the first one that can be set, or the last
+     * Find the basic_argument matching the given parameter (see
+     * basic_argument::matches()), either the first one that can be set, or the last
      * one that matches. Returns a null-pointer if not found.
-     * @param ident void, char or std::basic_string<char_t> to identify the argument to find
-     * @return First matching argument that can be set, last matching argument
+     * @param ident void, char or std::basic_string<char_t> to identify the basic_argument to find
+     * @return First matching basic_argument that can be set, last matching basic_argument
      *         if none can be set, or nullptr if no matching arguments
      */
     template<typename Ident>
-    const Argument<char_t>* findArg(Ident ident) const;
+    const basic_argument<char_t>* findArg(Ident ident) const;
 
     /**
-     * Helper function to set the value of an Argument of which takes_value()
+     * Helper function to set the value of an basic_argument of which takes_value()
      * returns true.
-     * @param arg Argument to set value to
+     * @param arg basic_argument to set value to
      * @param value Value to set
      */
-    void set_arg_value(const Argument<char_t>* arg, const std::basic_string<char_t>& value) const;
+    void set_arg_value(const basic_argument<char_t>* arg, const std::basic_string<char_t>& value) const;
 };
 
 }

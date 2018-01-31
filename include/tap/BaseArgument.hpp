@@ -18,8 +18,8 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 /**
- * @file BaseArgument.hpp
-* @brief Contains the definitions for BaseArgument.
+ * @file base_argument.hpp
+* @brief Contains the definitions for base_argument.
  */
 
 #pragma once
@@ -32,71 +32,71 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t>
-class Argument;
+class basic_argument;
 
 /**
- * Base argument class, used both by actual Argument classes and constraints
- * (ArgumentConstraint).
+ * Base basic_argument class, used both by actual basic_argument classes and constraints
+ * (basic_argument_constraint).
  */
 template<typename char_t>
-class BaseArgument {
+class base_argument {
 protected:
-    /** True if the argument has to be set */
+    /** True if the basic_argument has to be set */
     bool m_required = false;
 
 public:
     /**
      * Base constructor.
      */
-    BaseArgument() {
+    base_argument() {
     }
 
     /**
-     * BaseArgument copy constructor.
+     * base_argument copy constructor.
      */
-    BaseArgument(const BaseArgument&) = default;
+    base_argument(const base_argument&) = default;
 
     /**
-     * BaseArgument move constructor.
+     * base_argument move constructor.
      */
-    BaseArgument(BaseArgument&&) = default;
+    base_argument(base_argument&&) = default;
 
     /**
-     * BaseArgument destructor.
+     * base_argument destructor.
      */
-    virtual ~BaseArgument() {
+    virtual ~base_argument() {
     }
 
     /**
-     * BaseArgument assignment operator.
+     * base_argument assignment operator.
      */
-    BaseArgument& operator=(const BaseArgument&) = default;
+    base_argument& operator=(const base_argument&) = default;
 
     /**
-     * BaseArgument move assignment operator.
+     * base_argument move assignment operator.
      */
-    BaseArgument& operator=(BaseArgument&&) = default;
+    base_argument& operator=(base_argument&&) = default;
 
     /**
-     * Collect all Argument instances contained in this argument into the given
+     * Collect all basic_argument instances contained in this basic_argument into the given
      * vector.
      * @param collector Vector to store the arguments in
      */
-    virtual void find_all_arguments(std::vector<const Argument<char_t>*>& collector) const = 0;
+    virtual void find_all_arguments(std::vector<const basic_argument<char_t>*>& collector) const = 0;
 
     /**
      * Boolean conversion operator (so you can do things like
      * `if (arg) { ... }` ).
-     * It is set to true if and only if the argument is set.
-     * @return True iff the argument is set
+     * It is set to true if and only if the basic_argument is set.
+     * @return True iff the basic_argument is set
      */
     explicit operator bool() const {
         return is_set();
     }
 
     /**
-     * Return whether the argument has been set at least once.
-     * @return True iff the argument is set
+     * Return whether the basic_argument has been set at least once.
+     * @return True iff the basic_argument is set
      */
     bool is_set() const {
         return count() > 0;
@@ -104,7 +104,7 @@ public:
 
     /**
      * Return the actual count of occurrences.
-     * @return Count of times this argument occurred
+     * @return Count of times this basic_argument occurred
      */
     virtual unsigned int count() const = 0;
 
@@ -112,51 +112,51 @@ public:
     // Test operations
     ///////////////////
     /**
-     * Mark the argument as required or not.
-     * @param required If true, the argument must be set at least once (see
+     * Mark the basic_argument as required or not.
+     * @param required If true, the basic_argument must be set at least once (see
      *        min())
-     * @return Reference to this argument
+     * @return Reference to this basic_argument
      */
-    BaseArgument& set_required(bool required = true) {
+    base_argument& set_required(bool required = true) {
         m_required = required;
         return *this;
     }
 
     /**
-     * Returns whether the argument is required.
-     * @return True iff the argument is required
+     * Returns whether the basic_argument is required.
+     * @return True iff the basic_argument is required
      */
     bool required() const {
         return m_required;
     }
 
     /**
-     * Check if the argument constraints are satisfied. Returns if this is the
+     * Check if the basic_argument constraints are satisfied. Returns if this is the
      * case, will throw an TAP::exception indicating the problem otherwise.
      */
     virtual void check_valid() const = 0;
 
     /**
-     * Returns a string representing how the argument may be used on the command
+     * Returns a string representing how the basic_argument may be used on the command
      * line
      * @return The usage string
      */
     virtual std::basic_string<char_t> usage() const = 0;
 
     /**
-     * Make a clone of the BaseArgument. Returns a pointer which is owned by
+     * Make a clone of the base_argument. Returns a pointer which is owned by
      * the caller.
-     * @return Clone of the BaseArgument (or sub-class thereof)
+     * @return Clone of the base_argument (or sub-class thereof)
      */
-    virtual std::unique_ptr<BaseArgument> clone() const & = 0;
+    virtual std::unique_ptr<base_argument> clone() const & = 0;
 
     /**
-     * Make a clone of the BaseArgument and move all data to it. Returns a
+     * Make a clone of the base_argument and move all data to it. Returns a
      * pointer which is owned by the caller. The original object is no longer
      * valid.
-     * @return Clone of the BaseArgument (or sub-class thereof)
+     * @return Clone of the base_argument (or sub-class thereof)
      */
-    virtual std::unique_ptr<BaseArgument> clone() && = 0;
+    virtual std::unique_ptr<base_argument> clone() && = 0;
 
 };
 

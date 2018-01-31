@@ -68,7 +68,7 @@ public:
 };
 
 /**
- * Exception class raised when an unknown argument is encountered.
+ * Exception class raised when an unknown basic_argument is encountered.
  */
 template<typename char_t>
 class unknown_argument : public command_error {
@@ -85,7 +85,7 @@ public:
      * @param flag The unknown flag
      */
     unknown_argument(char_t flag) :
-        command_error(std::string("The flag argument ") + flag + " is unknown") {
+        command_error(std::string("The flag basic_argument ") + flag + " is unknown") {
     }
 
     /**
@@ -93,60 +93,60 @@ public:
      * @param name The unknown name
      */
     unknown_argument(std::string name) :
-        command_error(std::string("The named argument ") + name + " is unknown") {
+        command_error(std::string("The named basic_argument ") + name + " is unknown") {
     }
 };
 
 /**
  * Exception class raised when an error occurs verifying a command line
- * argument.
+ * basic_argument.
  */
 template<typename char_t>
 class argument_error : public exception {
 protected:
-    /** Copy of the argument involved in the error */
-    std::unique_ptr<Argument<char_t>> m_arg;
+    /** Copy of the basic_argument involved in the error */
+    std::unique_ptr<basic_argument<char_t>> m_arg;
 
 public:
     /**
-     * Creates the exception for the given argument, without a specified
+     * Creates the exception for the given basic_argument, without a specified
      * reason.
-     * @param arg The argument with an error
+     * @param arg The basic_argument with an error
      */
-    argument_error(const Argument<char_t>& arg);
+    argument_error(const basic_argument<char_t>& arg);
 
     /**
-     * Creates the exception for the given argument, with a specified reason.
-     * @param arg The argument with an error
+     * Creates the exception for the given basic_argument, with a specified reason.
+     * @param arg The basic_argument with an error
      * @param reason The reason of the error
      */
-    argument_error(const Argument<char_t>& arg, const std::string& reason);
+    argument_error(const basic_argument<char_t>& arg, const std::string& reason);
 
     /**
-     * Returns the argument triggering the error.
-     * @return The argument triggering the error
+     * Returns the basic_argument triggering the error.
+     * @return The basic_argument triggering the error
      */
-    const Argument<char_t>& arg() const {
+    const basic_argument<char_t>& arg() const {
         return *m_arg;
     }
 };
 
 /**
- * Exception class raised when an argument is used an incorrect amount of
+ * Exception class raised when an basic_argument is used an incorrect amount of
  * times.
  */
 template<typename char_t>
 class argument_count_mismatch : public argument_error<char_t> {
 public:
     /**
-     * Creates the exception for the given argument, with the number of
+     * Creates the exception for the given basic_argument, with the number of
      * occurrences and the expected number of occurrences. If the expected
      * value is higher, it is assumed to be a minimum, otherwise a maximum.
-     * @param arg The argument with an error
-     * @param count The number of times the argument occurred
-     * @param expected The number of times the argument was expected to occur
+     * @param arg The basic_argument with an error
+     * @param count The number of times the basic_argument occurred
+     * @param expected The number of times the basic_argument was expected to occur
      */
-    argument_count_mismatch(const Argument<char_t>& arg, unsigned int count, unsigned int expected) :
+    argument_count_mismatch(const basic_argument<char_t>& arg, unsigned int count, unsigned int expected) :
         argument_error<char_t>(arg) {
         if (count < expected) {
             if (expected > 1) {
@@ -165,53 +165,53 @@ public:
 };
 
 /**
- * Exception class raised when an argument value is incorrect.
+ * Exception class raised when an basic_argument value is incorrect.
  */
 template<typename char_t>
 class argument_invalid_value : public argument_error<char_t> {
 public:
     /**
-     * Creates the exception for the given argument, with the incorrect value.
-     * @param arg The argument with an error
+     * Creates the exception for the given basic_argument, with the incorrect value.
+     * @param arg The basic_argument with an error
      * @param value The value given on the command line
      */
-    argument_invalid_value(const Argument<char_t>& arg, const std::string& value) :
+    argument_invalid_value(const basic_argument<char_t>& arg, const std::string& value) :
         argument_error<char_t>(arg, std::string("does not accept the value ") + value) {
     }
 };
 
 /**
- * Exception class raised when an argument value is missing from the command
+ * Exception class raised when an basic_argument value is missing from the command
  * line.
  */
 template<typename char_t>
 class argument_missing_value : public argument_error<char_t> {
 public:
     /**
-     * Creates the exception for the given argument, which misses a value.
+     * Creates the exception for the given basic_argument, which misses a value.
      */
-    argument_missing_value(const Argument<char_t>& arg) :
+    argument_missing_value(const basic_argument<char_t>& arg) :
         argument_error<char_t>(arg, "requires a value") {
     }
 };
 
 /**
- * Exception class raised when an argument value is given but not expected.
+ * Exception class raised when an basic_argument value is given but not expected.
  */
 template<typename char_t>
 class argument_no_value : public argument_error<char_t> {
 public:
     /**
-     * Creates the exception for the given argument, which was given a value
+     * Creates the exception for the given basic_argument, which was given a value
      * but does not accept one.
      */
-    argument_no_value(const Argument<char_t>& arg) :
+    argument_no_value(const basic_argument<char_t>& arg) :
         argument_error<char_t>(arg, "does not accept a value") {
     }
 };
 
 /**
- * Exception class raised when an argument constraint is not satisfied.
+ * Exception class raised when an basic_argument constraint is not satisfied.
  */
 template<typename char_t>
 class constraint_error : public exception {
@@ -222,6 +222,6 @@ public:
      * @param reason Reason of failure
      * @param args List of arguments that caused the failure
      */
-    constraint_error(const std::string& reason, const std::vector<const BaseArgument<char_t>*>& args);
+    constraint_error(const std::string& reason, const std::vector<const base_argument<char_t>*>& args);
 };
 }

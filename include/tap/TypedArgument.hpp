@@ -18,8 +18,8 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 /**
- * @file TypedArgument.hpp
- * @brief Contains the definitions for ValueArguments.
+ * @file typed_argument.hpp
+ * @brief Contains the definitions for basic_value_arguments.
  */
 
 #pragma once
@@ -29,11 +29,11 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t, typename T, bool multi = false>
-class TypedArgument;
+class typed_argument;
 
-/** Function pointer that is used by ValueArgument::check() */
+/** Function pointer that is used by basic_value_argument::check() */
 template<typename char_t, typename T, bool multi>
-using TypedArgumentCheckFunc = std::function<void(const TypedArgument<char_t, T, multi>&, const T& value)>;
+using typed_argumentCheckFunc = std::function<void(const typed_argument<char_t, T, multi>&, const T& value)>;
 
 /**
  * Base class for arguments that hold a typed value. The class can optionally be
@@ -41,20 +41,20 @@ using TypedArgumentCheckFunc = std::function<void(const TypedArgument<char_t, T,
  * used instead of check.
  * Template parameter T indicates the type of the value to store.
  * Template parameter multi indicates if multiple values should be stored.
- * Defaults to false. Note that if multi is false, but the argument can be set
+ * Defaults to false. Note that if multi is false, but the basic_argument can be set
  * multiple times, the value is overwritten each time.
  * Note that this class cannot be used directly, a derived class is to be used.
  */
 template<typename char_t, typename T, bool multi>
-class TypedArgument: public Argument<char_t> {
-    static_assert(!std::is_void<T>::value, "Cannot make void arguments, use plain Argument");
+class typed_argument: public basic_argument<char_t> {
+    static_assert(!std::is_void<T>::value, "Cannot make void arguments, use plain basic_argument");
     static_assert(!std::is_const<T>::value, "Cannot make const arguments");
     static_assert(!std::is_volatile<T>::value, "Cannot make volatile arguments");
     static_assert(!std::is_reference<T>::value, "Cannot make reference arguments");
     static_assert(!std::is_pointer<T>::value, "Cannot make pointer arguments");
 
 protected:
-    /** Alias for the storage type (which is a vector for MultiValueArgument
+    /** Alias for the storage type (which is a vector for Multibasic_value_argument
      * types) */
     using ST = typename std::conditional< !multi, T, std::vector<T> >::type;
 
@@ -62,100 +62,100 @@ protected:
     mutable ST* m_storage;
 
     /** Callback for typed check */
-    TypedArgumentCheckFunc<char_t, T, multi> m_typedCheckFunc = nullptr;
+    typed_argumentCheckFunc<char_t, T, multi> m_typedCheckFunc = nullptr;
 
 protected:
     /**
-     * Create a TypedArgument with given description and storage pointer. Values
+     * Create a typed_argument with given description and storage pointer. Values
      * will be stored in the variable pointed to.
-     * @param description Description of the argument (used in help text)
+     * @param description Description of the basic_argument (used in help text)
      * @param storage Pointer to storage variable
      */
-    TypedArgument(std::basic_string<char_t> description, ST* storage) :
-        Argument<char_t>(std::move(description)), m_storage(storage) {
-        Argument<char_t>::m_max = (multi?0:1);
+    typed_argument(std::basic_string<char_t> description, ST* storage) :
+        basic_argument<char_t>(std::move(description)), m_storage(storage) {
+        basic_argument<char_t>::m_max = (multi?0:1);
     }
 
     /**
-     * Create a TypedArgument with given description and storage pointer,
+     * Create a typed_argument with given description and storage pointer,
      * aliased to the given flag. Values will be stored in the variable pointed
      * to.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    TypedArgument(std::basic_string<char_t> description, char_t flag, ST* storage) :
-        Argument<char_t>(std::move(description), flag), m_storage(storage) {
-        Argument<char_t>::m_max = (multi?0:1);
+    typed_argument(std::basic_string<char_t> description, char_t flag, ST* storage) :
+        basic_argument<char_t>(std::move(description), flag), m_storage(storage) {
+        basic_argument<char_t>::m_max = (multi?0:1);
     }
 
     /**
-     * Create a TypedArgument with given description and storage pointer,
+     * Create a typed_argument with given description and storage pointer,
      * aliased to the given name. Values will be stored in the variable pointed
      * to.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    TypedArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST* storage) :
-        Argument<char_t>(std::move(description), name), m_storage(storage) {
-        Argument<char_t>::m_max = (multi?0:1);
+    typed_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST* storage) :
+        basic_argument<char_t>(std::move(description), name), m_storage(storage) {
+        basic_argument<char_t>::m_max = (multi?0:1);
     }
 
     /**
-     * Create a TypedArgument with given description and storage pointer,
+     * Create a typed_argument with given description and storage pointer,
      * aliased to the given flag and name. Values will be stored in the variable
      * pointed to.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    TypedArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST* storage) :
-        Argument<char_t>(std::move(description), flag, name), m_storage(storage) {
-        Argument<char_t>::m_max = (multi?0:1);
+    typed_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST* storage) :
+        basic_argument<char_t>(std::move(description), flag, name), m_storage(storage) {
+        basic_argument<char_t>::m_max = (multi?0:1);
     }
 
 public:
     /**
-     * See Argument::set()
+     * See basic_argument::set()
      */
     void set() const override = 0;
 
     /**
-     * See Argument::takes_value()
+     * See basic_argument::takes_value()
      */
     bool takes_value() const override = 0;
 
     /**
-     * Returns the value of this argument.
-     * @return Reference to the value of this argument.
+     * Returns the value of this basic_argument.
+     * @return Reference to the value of this basic_argument.
      */
     const ST& value() const {
         return *m_storage;
     }
 
     /**
-     * See Argument::check()
+     * See basic_argument::check()
      */
-    virtual TypedArgument& check_typed(TypedArgumentCheckFunc<char_t, T, multi> typedCheckFunc) {
+    virtual typed_argument& check_typed(typed_argumentCheckFunc<char_t, T, multi> typedCheckFunc) {
         m_typedCheckFunc = typedCheckFunc;
         return *this;
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override = 0;
+    std::unique_ptr<base_argument<char_t>> clone() const & override = 0;
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override = 0;
+    std::unique_ptr<base_argument<char_t>> clone() && override = 0;
 
 protected:
     /**
-     * See Argument::check()
+     * See basic_argument::check()
      */
     void
     check() const override {
@@ -163,7 +163,7 @@ protected:
     }
 
     /**
-     * See Argument::check()
+     * See basic_argument::check()
      */
     template<bool m = multi>
     typename std::enable_if<!m>::type
@@ -174,7 +174,7 @@ protected:
     }
 
     /**
-     * See Argument::check()
+     * See basic_argument::check()
      */
     template<bool m = multi>
     typename std::enable_if<m>::type
@@ -186,176 +186,176 @@ protected:
 };
 
 /**
- * Concrete implementation of TypedArgument. Simply takes a value and stores it
+ * Concrete implementation of typed_argument. Simply takes a value and stores it
  * in a variable.
  */
 template<typename char_t, typename T, bool multi = false>
-class VariableArgument : public TypedArgument<char_t, T, multi>, public ValueAcceptor<char_t> {
-    static_assert(!std::is_void<T>::value, "Cannot make void arguments, use Argument");
+class basic_variable_argument : public typed_argument<char_t, T, multi>, public value_acceptor<char_t> {
+    static_assert(!std::is_void<T>::value, "Cannot make void arguments, use basic_argument");
 
 protected:
-    /** Make TypedArgument::ST accessible. */
-    using ST = typename TypedArgument<char_t, T, multi>::ST;
+    /** Make typed_argument::ST accessible. */
+    using ST = typename typed_argument<char_t, T, multi>::ST;
 
     /** Name of the accepted value, used in the identifier */
     std::basic_string<char_t> m_valueName = std::basic_string<char_t>("value");
 
 public:
     /**
-     * Create a VariableArgument with given description and storage pointer.
+     * Create a basic_variable_argument with given description and storage pointer.
      * Values will be stored in the variable pointed to.
-     * @param description Description of the argument (used in help text)
+     * @param description Description of the basic_argument (used in help text)
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, ST* storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), storage) {
+    basic_variable_argument(std::basic_string<char_t> description, ST* storage) :
+        typed_argument<char_t, T, multi>(std::move(description), storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage pointer,
+     * Create a basic_variable_argument with given description and storage pointer,
      * aliased to the given flag. Values will be stored in the variable pointed
      * to.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, char_t flag, ST* storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), flag, storage) {
+    basic_variable_argument(std::basic_string<char_t> description, char_t flag, ST* storage) :
+        typed_argument<char_t, T, multi>(std::move(description), flag, storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage pointer,
+     * Create a basic_variable_argument with given description and storage pointer,
      * aliased to the given name. Values will be stored in the variable pointed
      * to.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST* storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), name, storage) {
+    basic_variable_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST* storage) :
+        typed_argument<char_t, T, multi>(std::move(description), name, storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage pointer,
+     * Create a basic_variable_argument with given description and storage pointer,
      * aliased to the given flag and name. Values will be stored in the variable
      * pointed to.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST* storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), flag, name, storage) {
+    basic_variable_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST* storage) :
+        typed_argument<char_t, T, multi>(std::move(description), flag, name, storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage reference.
+     * Create a basic_variable_argument with given description and storage reference.
      * Values will be stored in the variable referenced.
-     * @param description Description of the argument (used in help text)
+     * @param description Description of the basic_argument (used in help text)
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, ST& storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), &storage) {
+    basic_variable_argument(std::basic_string<char_t> description, ST& storage) :
+        typed_argument<char_t, T, multi>(std::move(description), &storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage reference,
+     * Create a basic_variable_argument with given description and storage reference,
      * aliased to the given flag. Values will be stored in the variable
      * referenced.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, char_t flag, ST& storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), flag, &storage) {
+    basic_variable_argument(std::basic_string<char_t> description, char_t flag, ST& storage) :
+        typed_argument<char_t, T, multi>(std::move(description), flag, &storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage reference,
+     * Create a basic_variable_argument with given description and storage reference,
      * aliased to the given name. Values will be stored in the variable
      * referenced.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST& storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), name, &storage) {
+    basic_variable_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, ST& storage) :
+        typed_argument<char_t, T, multi>(std::move(description), name, &storage) {
     }
 
     /**
-     * Create a VariableArgument with given description and storage reference,
+     * Create a basic_variable_argument with given description and storage reference,
      * aliased to the given flag and name. Values will be stored in the variable
      * referenced.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      * @param storage Pointer to storage variable
      */
-    VariableArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST& storage) :
-        TypedArgument<char_t, T, multi>(std::move(description), flag, name, &storage) {
+    basic_variable_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, ST& storage) :
+        typed_argument<char_t, T, multi>(std::move(description), flag, name, &storage) {
     }
 
     /**
-     * VariableArgument destructor.
+     * basic_variable_argument destructor.
      */
-    virtual ~VariableArgument() = default;
+    virtual ~basic_variable_argument() = default;
 
     /**
-     * VariableArgument copy constructor.
+     * basic_variable_argument copy constructor.
      */
-    VariableArgument(const VariableArgument&) = default;
+    basic_variable_argument(const basic_variable_argument&) = default;
 
     /**
-     * VariableArgument move constructor.
+     * basic_variable_argument move constructor.
      */
-    VariableArgument(VariableArgument&&) = default;
+    basic_variable_argument(basic_variable_argument&&) = default;
 
     /**
-     * VariableArgument copy assignment operator.
+     * basic_variable_argument copy assignment operator.
      */
-    VariableArgument& operator=(const VariableArgument&) = default;
+    basic_variable_argument& operator=(const basic_variable_argument&) = default;
 
     /**
-     * VariableArgument move assignment operator.
+     * basic_variable_argument move assignment operator.
      */
-    VariableArgument& operator=(VariableArgument&&) = default;
+    basic_variable_argument& operator=(basic_variable_argument&&) = default;
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
-        return std::unique_ptr<BaseArgument<char_t>>(new VariableArgument(*this));
+    std::unique_ptr<base_argument<char_t>> clone() const & override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_variable_argument(*this));
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override {
-        return std::unique_ptr<BaseArgument<char_t>>(new VariableArgument(std::move(*this)));
+    std::unique_ptr<base_argument<char_t>> clone() && override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_variable_argument(std::move(*this)));
     }
 
     /**
      * Assign a human readable description for the value, used when describing
-     * the argument. Default is 'value'.
+     * the basic_argument. Default is 'value'.
      * @param valueName String to describe the name of the value.
-     * @return Reference to this argument
+     * @return Reference to this basic_argument
      */
-    VariableArgument& valuename(const std::basic_string<char_t>& valueName) {
+    basic_variable_argument& valuename(const std::basic_string<char_t>& valueName) {
         m_valueName = valueName;
         return *this;
     }
 
     /**
      * Return a human readable description for the value, used when describing
-     * the argument. Default is 'value'.
-     * @return String representing the value argument in help text
+     * the basic_argument. Default is 'value'.
+     * @return String representing the value basic_argument in help text
      */
     const std::basic_string<char_t>& valuename() {
         return m_valueName;
     }
 
     /**
-     * See Argument::takes_value()
+     * See basic_argument::takes_value()
      */
     bool takes_value() const override {
         return !std::is_same<bool, T>::value;
@@ -367,159 +367,159 @@ public:
     void set() const override;
 
     /**
-     * See ValueAcceptor::set()
+     * See value_acceptor::set()
      */
     void set(const std::basic_string<char_t>& value) const override;
 
     /**
-     * See Argument::usage()
+     * See basic_argument::usage()
      */
     std::basic_string<char_t> usage() const override;
 
     /**
-     * See Argument::ident()
+     * See basic_argument::ident()
      */
     std::basic_string<char_t> ident() const override;
 };
 
 /**
- * MultiVariableArgument is a VariableArgument that, when allowed to occur
+ * Multibasic_variable_argument is a basic_variable_argument that, when allowed to occur
  * multiple times, stores each given value individually in a vector.
- * Alias for VariableArgument with the multi template argument set to true.
+ * Alias for basic_variable_argument with the multi template basic_argument set to true.
  */
 template<typename char_t, typename T>
-using MultiVariableArgument = VariableArgument<char_t, T, true>;
+using basic_multi_variable_argument = basic_variable_argument<char_t, T, true>;
 
 /**
- * Implementation of TypedArgument that stores a value by itself, based on
- * VariableArgument.
+ * Implementation of typed_argument that stores a value by itself, based on
+ * basic_variable_argument.
  */
 template<typename char_t, typename T, bool multi = false>
-class ValueArgument : public VariableArgument<char_t, T, multi> {
+class basic_value_argument : public basic_variable_argument<char_t, T, multi> {
 protected:
-    /** Make TypedArgument::ST accessible. */
-    using ST = typename VariableArgument<char_t, T, multi>::ST;
+    /** Make typed_argument::ST accessible. */
+    using ST = typename basic_variable_argument<char_t, T, multi>::ST;
 
-    /** If the ValueArgument owns the variable storage, it is stored here */
+    /** If the basic_value_argument owns the variable storage, it is stored here */
     std::shared_ptr<ST> m_ownStorage;
 
 public:
     /**
-     * Create a positional ValueArgument using an internal variable to store
+     * Create a positional basic_value_argument using an internal variable to store
      * the value. The parameter list is used to construct the value.
-     * @param description Description of the argument (used in help text)
-     * @param params Arguments passed to the constructor of the value storage
+     * @param description Description of the basic_argument (used in help text)
+     * @param params arguments passed to the constructor of the value storage
      */
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
-    ValueArgument(std::basic_string<char_t> description, U&&... params) :
-        VariableArgument<char_t, T, multi>(std::move(description), new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<char_t, T, multi>::m_storage)
+    basic_value_argument(std::basic_string<char_t> description, U&&... params) :
+        basic_variable_argument<char_t, T, multi>(std::move(description), new ST(std::forward<U>(params)...)),
+        m_ownStorage(typed_argument<char_t, T, multi>::m_storage)
     {
     }
 
     /**
-     * Create a ValueArgument using an internal variable to store the value,
+     * Create a basic_value_argument using an internal variable to store the value,
      * aliased to the given flag. The parameter list is used to construct the
      * value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param params Arguments passed to the constructor of the value storage
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param params arguments passed to the constructor of the value storage
      */
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type>
-    ValueArgument(std::basic_string<char_t> description, char_t flag, U&&... params) :
-        VariableArgument<char_t, T, multi>(std::move(description), flag, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<char_t, T, multi>::m_storage)
+    basic_value_argument(std::basic_string<char_t> description, char_t flag, U&&... params) :
+        basic_variable_argument<char_t, T, multi>(std::move(description), flag, new ST(std::forward<U>(params)...)),
+        m_ownStorage(typed_argument<char_t, T, multi>::m_storage)
     {
     }
 
     /**
-     * Create a ValueArgument using an internal variable to store the value,
+     * Create a basic_value_argument using an internal variable to store the value,
      * aliased to the given flag. The parameter list is used to construct the
      * value.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
-     * @param params Arguments passed to the constructor of the value storage
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
+     * @param params arguments passed to the constructor of the value storage
      */
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
-    ValueArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, U&&... params) :
-        VariableArgument<char_t, T, multi>(std::move(description), name, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<char_t, T, multi>::m_storage)
+    basic_value_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, U&&... params) :
+        basic_variable_argument<char_t, T, multi>(std::move(description), name, new ST(std::forward<U>(params)...)),
+        m_ownStorage(typed_argument<char_t, T, multi>::m_storage)
     {
     }
 
     /**
-     * Create a ValueArgument using an internal variable to store the value,
+     * Create a basic_value_argument using an internal variable to store the value,
      * aliased to the given flag and name. The parameter list is used to
      * construct the value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
-     * @param params Arguments passed to the constructor of the value storage
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
+     * @param params arguments passed to the constructor of the value storage
      */
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
-    ValueArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, U&&... params) :
-        VariableArgument<char_t, T, multi>(std::move(description), flag, name, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<char_t, T, multi>::m_storage)
+    basic_value_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, U&&... params) :
+        basic_variable_argument<char_t, T, multi>(std::move(description), flag, name, new ST(std::forward<U>(params)...)),
+        m_ownStorage(typed_argument<char_t, T, multi>::m_storage)
     {
     }
 
     /**
-     * ValueArgument destructor.
+     * basic_value_argument destructor.
      */
-    virtual ~ValueArgument() = default;
+    virtual ~basic_value_argument() = default;
 
     /**
-     * ValueArgument copy constructor.
+     * basic_value_argument copy constructor.
      */
-    ValueArgument(const ValueArgument&) = default;
+    basic_value_argument(const basic_value_argument&) = default;
 
     /**
-     * ValueArgument move constructor.
+     * basic_value_argument move constructor.
      */
-    ValueArgument(ValueArgument&&) = default;
+    basic_value_argument(basic_value_argument&&) = default;
 
     /**
-     * ValueArgument copy assignment operator. Will copy the stored value if
-     * the other ValueArgument owns the variable, otherwise simply copies the
+     * basic_value_argument copy assignment operator. Will copy the stored value if
+     * the other basic_value_argument owns the variable, otherwise simply copies the
      * pointer.
      */
-    ValueArgument& operator=(const ValueArgument&) = default;
+    basic_value_argument& operator=(const basic_value_argument&) = default;
 
     /**
-     * ValueArgument move assignment operator.
+     * basic_value_argument move assignment operator.
      */
-    ValueArgument& operator=(ValueArgument&&) = default;
+    basic_value_argument& operator=(basic_value_argument&&) = default;
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
-        return std::unique_ptr<BaseArgument<char_t>>(new ValueArgument(*this));
+    std::unique_ptr<base_argument<char_t>> clone() const & override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_value_argument(*this));
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override {
-        return std::unique_ptr<BaseArgument<char_t>>(new ValueArgument(std::move(*this)));
+    std::unique_ptr<base_argument<char_t>> clone() && override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_value_argument(std::move(*this)));
     }
 };
 
 /**
- * MultiValueArgument is a ValueArgument that, when allowed to occur multiple
+ * Multibasic_value_argument is a basic_value_argument that, when allowed to occur multiple
  * times, stores each given value individually in a vector.
- * Alias for ValueArgument with the multi template argument set to true.
+ * Alias for basic_value_argument with the multi template basic_argument set to true.
  */
 template<typename char_t, typename T>
-using MultiValueArgument = ValueArgument<char_t, T, true>;
+using basic_multi_value_argument = basic_value_argument<char_t, T, true>;
 
 /**
- * Specialization of TypedArgument that acts as a switch on the command line,
+ * Specialization of typed_argument that acts as a switch on the command line,
  * but stores an arbitrary constant in the given variable storage. Practical for
  * for instance enumerations.
  */
 template<typename char_t, typename T>
-class ConstArgument: public TypedArgument<char_t, T, false> {
+class basic_const_argument: public typed_argument<char_t, T, false> {
 protected:
     /** Constant to store */
     T m_value;
@@ -527,120 +527,120 @@ protected:
 public:
 #ifdef TAP_AUTOFLAG
     /**
-     * Create a constant argument with aliases defined by the description, using
+     * Create a constant basic_argument with aliases defined by the description, using
      * an external variable to store a predefined value.
-     * @param description Description of the argument (used in help text). Must
+     * @param description Description of the basic_argument (used in help text). Must
      *        contain flag or name markers
      * @param storage Variable to store the value in
-     * @param value Value to set the variable to when this argument is set
+     * @param value Value to set the variable to when this basic_argument is set
      */
-    ConstArgument(std::basic_string<char_t> description, T& storage, const T& value) :
-        TypedArgument<char_t, T, false>(std::move(description), &storage), m_value(value) {
+    basic_const_argument(std::basic_string<char_t> description, T& storage, const T& value) :
+        typed_argument<char_t, T, false>(std::move(description), &storage), m_value(value) {
     }
 #endif
 
     /**
-     * Create a constant argument that is identified by a flag, using an
+     * Create a constant basic_argument that is identified by a flag, using an
      * external variable to store a predefined value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      * @param storage Variable to store the value in
-     * @param value Value to set the variable to when this argument is set
+     * @param value Value to set the variable to when this basic_argument is set
      */
-    ConstArgument(std::basic_string<char_t> description, char_t flag, T& storage, const T& value) :
-        TypedArgument<char_t, T, false>(std::move(description), flag, &storage), m_value(value) {
+    basic_const_argument(std::basic_string<char_t> description, char_t flag, T& storage, const T& value) :
+        typed_argument<char_t, T, false>(std::move(description), flag, &storage), m_value(value) {
     }
 
     /**
-     * Create a constant argument that is identified by a name, using an
+     * Create a constant basic_argument that is identified by a name, using an
      * external variable to store a predefined value.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      * @param storage Variable to store the value in
-     * @param value Value to set the variable to when this argument is set
+     * @param value Value to set the variable to when this basic_argument is set
      */
-    ConstArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, T& storage, const T& value) :
-        TypedArgument<char_t, T, false>(std::move(description), name, &storage), m_value(value) {
+    basic_const_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, T& storage, const T& value) :
+        typed_argument<char_t, T, false>(std::move(description), name, &storage), m_value(value) {
     }
 
     /**
-     * Create a constant argument that is identified by both a flag and a name,
+     * Create a constant basic_argument that is identified by both a flag and a name,
      * using an external variable to store a predefined value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      * @param storage Variable to store the value in
-     * @param value Value to set the variable to when this argument is set
+     * @param value Value to set the variable to when this basic_argument is set
      */
-    ConstArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, T& storage, const T& value) :
-        TypedArgument<char_t, T, false>(std::move(description), flag, name, &storage), m_value(value) {
+    basic_const_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, T& storage, const T& value) :
+        typed_argument<char_t, T, false>(std::move(description), flag, name, &storage), m_value(value) {
     }
 
     /**
-     * ConstArgument copy constructor.
+     * basic_const_argument copy constructor.
      */
-    ConstArgument(const ConstArgument&) = default;
+    basic_const_argument(const basic_const_argument&) = default;
     /**
-     * ConstArgument move constructor.
+     * basic_const_argument move constructor.
      */
-    ConstArgument(ConstArgument&&) = default;
+    basic_const_argument(basic_const_argument&&) = default;
 
     /**
-     * ConstArgument destructor.
+     * basic_const_argument destructor.
      */
-    virtual ~ConstArgument() {
+    virtual ~basic_const_argument() {
     }
 
     /**
-     * ConstArgument assignment operator.
+     * basic_const_argument assignment operator.
      */
-    ConstArgument& operator=(const ConstArgument& other) = default;
+    basic_const_argument& operator=(const basic_const_argument& other) = default;
 
     /**
-     * ConstArgument move assignment operator.
+     * basic_const_argument move assignment operator.
      */
-    ConstArgument& operator=(ConstArgument&& other) = default;
+    basic_const_argument& operator=(basic_const_argument&& other) = default;
 
     /**
-     * See Argument::takes_value()
+     * See basic_argument::takes_value()
      */
     bool takes_value() const override {
         return false;
     }
 
     /**
-     * See Argument::set()
+     * See basic_argument::set()
      */
     void set() const override {
-        Argument<char_t>::set();
-        *TypedArgument<char_t, T, false>::m_storage = m_value;
+        basic_argument<char_t>::set();
+        *typed_argument<char_t, T, false>::m_storage = m_value;
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
-        return std::unique_ptr<BaseArgument<char_t>>(new ConstArgument(*this));
+    std::unique_ptr<base_argument<char_t>> clone() const & override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_const_argument(*this));
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override {
-        return std::unique_ptr<BaseArgument<char_t>>(new ConstArgument(std::move(*this)));
+    std::unique_ptr<base_argument<char_t>> clone() && override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_const_argument(std::move(*this)));
     }
 };
 
 /**
- * SwitchArgument is a specialization for TypedArgument, which does not
+ * basic_switch_argument is a specialization for typed_argument, which does not
  * accept values (it switches). When allowed to occur multiple times, the value
  * is inverted each time it occurs. Use this to keep track of the actual value
  * in a variable.
  */
 template<typename char_t>
-class SwitchArgument : public TypedArgument<char_t, bool, false> {
+class basic_switch_argument : public typed_argument<char_t, bool, false> {
 protected:
-    /** If the SwitchArgument owns the variable storage, it is stored here */
+    /** If the basic_switch_argument owns the variable storage, it is stored here */
     std::shared_ptr<bool> m_ownStorage;
 
 public:
@@ -649,49 +649,49 @@ public:
     /////////////////
 #ifdef TAP_AUTOFLAG
     /**
-     * Create a switch argument with aliases defined by the description, using
+     * Create a switch basic_argument with aliases defined by the description, using
      * an external variable to store the value.
-     * @param description Description of the argument (used in help text). Must
+     * @param description Description of the basic_argument (used in help text). Must
      *        contain flag or name markers
      * @param storage Variable to store the value in
      */
-    SwitchArgument(std::basic_string<char_t> description, bool& storage) :
-        TypedArgument<char_t, bool, false>(std::move(description), &storage) {
+    basic_switch_argument(std::basic_string<char_t> description, bool& storage) :
+        typed_argument<char_t, bool, false>(std::move(description), &storage) {
     }
 #endif
 
     /**
-     * Create a switch argument that is identified by a flag, using an
+     * Create a switch basic_argument that is identified by a flag, using an
      * external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      * @param storage Variable to store the value in
      */
-    SwitchArgument(std::basic_string<char_t> description, char_t flag, bool& storage) :
-        TypedArgument<char_t, bool, false>(std::move(description), flag, &storage) {
+    basic_switch_argument(std::basic_string<char_t> description, char_t flag, bool& storage) :
+        typed_argument<char_t, bool, false>(std::move(description), flag, &storage) {
     }
 
     /**
-     * Create a switch argument that is identified by a name, using an
+     * Create a switch basic_argument that is identified by a name, using an
      * external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      * @param storage Variable to store the value in
      */
-    SwitchArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, bool& storage) :
-        TypedArgument<char_t, bool, false>(std::move(description), name, &storage) {
+    basic_switch_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name, bool& storage) :
+        typed_argument<char_t, bool, false>(std::move(description), name, &storage) {
     }
 
     /**
-     * Create a switch argument that is identified by both a flag and a name,
+     * Create a switch basic_argument that is identified by both a flag and a name,
      * using an external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      * @param storage Variable to store the value in
      */
-    SwitchArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, bool& storage) :
-        TypedArgument<char_t, bool, false>(std::move(description), flag, name, &storage) {
+    basic_switch_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name, bool& storage) :
+        typed_argument<char_t, bool, false>(std::move(description), flag, name, &storage) {
     }
 
     /////////////////
@@ -699,110 +699,110 @@ public:
     /////////////////
 #ifdef TAP_AUTOFLAG
     /**
-     * Create a switch argument with aliases defined by the description, using
+     * Create a switch basic_argument with aliases defined by the description, using
      * an internal variable to store the value.
-     * @param description Description of the argument (used in help text). Must
+     * @param description Description of the basic_argument (used in help text). Must
      *        contain flag or name markers
      */
-    SwitchArgument(std::basic_string<char_t> description) :
-        TypedArgument<char_t, bool, false>(std::move(description), new bool()),
-        m_ownStorage(TypedArgument<char_t, bool, false>::m_storage) {
+    basic_switch_argument(std::basic_string<char_t> description) :
+        typed_argument<char_t, bool, false>(std::move(description), new bool()),
+        m_ownStorage(typed_argument<char_t, bool, false>::m_storage) {
     }
 #endif
 
     /**
-     * Create a switch argument that is identified by a flag, using an
+     * Create a switch basic_argument that is identified by a flag, using an
      * external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
      */
-    SwitchArgument(std::basic_string<char_t> description, char_t flag) :
-        TypedArgument<char_t, bool, false>(std::move(description), flag, new bool()),
-        m_ownStorage(TypedArgument<char_t, bool, false>::m_storage) {
+    basic_switch_argument(std::basic_string<char_t> description, char_t flag) :
+        typed_argument<char_t, bool, false>(std::move(description), flag, new bool()),
+        m_ownStorage(typed_argument<char_t, bool, false>::m_storage) {
     }
 
     /**
-     * Create a switch argument that is identified by a name, using an
+     * Create a switch basic_argument that is identified by a name, using an
      * external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param name Name identifier of this basic_argument
      */
-    SwitchArgument(std::basic_string<char_t> description, const std::basic_string<char_t>& name) :
-        TypedArgument<char_t, bool, false>(std::move(description), name, new bool()),
-        m_ownStorage(TypedArgument<char_t, bool, false>::m_storage) {
+    basic_switch_argument(std::basic_string<char_t> description, const std::basic_string<char_t>& name) :
+        typed_argument<char_t, bool, false>(std::move(description), name, new bool()),
+        m_ownStorage(typed_argument<char_t, bool, false>::m_storage) {
     }
 
     /**
-     * Create a switch argument that is identified by both a flag and a name,
+     * Create a switch basic_argument that is identified by both a flag and a name,
      * using an external variable to store the value.
-     * @param description Description of the argument (used in help text)
-     * @param flag Flag identifier of this argument
-     * @param name Name identifier of this argument
+     * @param description Description of the basic_argument (used in help text)
+     * @param flag Flag identifier of this basic_argument
+     * @param name Name identifier of this basic_argument
      */
-    SwitchArgument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name) :
-        TypedArgument<char_t, bool, false>(std::move(description), flag, name, new bool()),
-        m_ownStorage(TypedArgument<char_t, bool, false>::m_storage)  {
+    basic_switch_argument(std::basic_string<char_t> description, char_t flag, const std::basic_string<char_t>& name) :
+        typed_argument<char_t, bool, false>(std::move(description), flag, name, new bool()),
+        m_ownStorage(typed_argument<char_t, bool, false>::m_storage)  {
     }
 
     /**
-     * SwitchArgument copy constructor.
+     * basic_switch_argument copy constructor.
      */
-    SwitchArgument(const SwitchArgument&) = default;
+    basic_switch_argument(const basic_switch_argument&) = default;
 
     /**
-     * SwitchArgument move constructor.
+     * basic_switch_argument move constructor.
      */
-    SwitchArgument(SwitchArgument&&) = default;
+    basic_switch_argument(basic_switch_argument&&) = default;
 
     /**
-     * SwitchArgument destructor.
+     * basic_switch_argument destructor.
      */
-    virtual ~SwitchArgument() {}
+    virtual ~basic_switch_argument() {}
 
     /**
-     * SwitchArgument assignment operator.
+     * basic_switch_argument assignment operator.
      */
-    SwitchArgument& operator=(const SwitchArgument& other) = default;
+    basic_switch_argument& operator=(const basic_switch_argument& other) = default;
 
     /**
-     * SwitchArgument move assignment operator.
+     * basic_switch_argument move assignment operator.
      */
-    SwitchArgument& operator=(SwitchArgument&& other) = default;
+    basic_switch_argument& operator=(basic_switch_argument&& other) = default;
 
     /**
-     * See Argument::takes_value()
+     * See basic_argument::takes_value()
      */
     bool takes_value() const override {
         return false;
     }
 
     /**
-     * See Argument::set()
+     * See basic_argument::set()
      */
     void set() const override {
-        Argument<char_t>::set();
-        *TypedArgument<char_t, bool, false>::m_storage = !*TypedArgument<char_t, bool, false>::m_storage;
+        basic_argument<char_t>::set();
+        *typed_argument<char_t, bool, false>::m_storage = !*typed_argument<char_t, bool, false>::m_storage;
     }
 
     /*
-     * See BaseArgument::operator bool()
+     * See base_argument::operator bool()
      */
     explicit operator bool() const {
-        return TypedArgument<char_t, bool, false>::is_set();
+        return typed_argument<char_t, bool, false>::is_set();
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
-        return std::unique_ptr<BaseArgument<char_t>>(new SwitchArgument(*this));
+    std::unique_ptr<base_argument<char_t>> clone() const & override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_switch_argument(*this));
     }
 
     /**
-     * See BaseArgument::clone().
+     * See base_argument::clone().
      */
-    std::unique_ptr<BaseArgument<char_t>> clone() && override {
-        return std::unique_ptr<BaseArgument<char_t>>(new SwitchArgument(std::move(*this)));
+    std::unique_ptr<base_argument<char_t>> clone() && override {
+        return std::unique_ptr<base_argument<char_t>>(new basic_switch_argument(std::move(*this)));
     }
 };
 

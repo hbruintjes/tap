@@ -23,19 +23,19 @@ freely, subject to the following restrictions:
 namespace TAP {
 
 template<typename char_t>
-inline argument_error<char_t>::argument_error(const Argument<char_t>& arg) :
-    exception(std::string("Argument ") + arg.usage()),
-    m_arg(new Argument<char_t>(arg)) {
+inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg) :
+    exception(std::string("basic_argument ") + arg.usage()),
+    m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
-inline argument_error<char_t>::argument_error(const Argument<char_t>& arg, const std::string& reason) :
-    exception(std::string("Argument ") + arg.usage() + " " + reason),
-    m_arg(new Argument<char_t>(arg)) {
+inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg, const std::string& reason) :
+    exception(std::string("basic_argument ") + arg.usage() + " " + reason),
+    m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
-inline constraint_error<char_t>::constraint_error(const std::string& reason, const std::vector<const BaseArgument<char_t>*>& args) : exception() {
+inline constraint_error<char_t>::constraint_error(const std::string& reason, const std::vector<const base_argument<char_t>*>& args) : exception() {
     m_what = reason;
     bool first = true;
     for(auto arg: args) {
