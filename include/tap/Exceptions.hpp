@@ -35,7 +35,7 @@ namespace TAP {
  * Standard exception class for TAP. All TAP exceptions are derived from this.
  */
 template<typename char_t>
-class exception : public std::exception {
+class basic_exception : public std::exception {
 protected:
     /** Description of the exception. See what(). */
     std::basic_string<char_t> m_what;
@@ -46,12 +46,12 @@ public:
      * Creates the exception with the given message.
      * @param what Exception details
      */
-    exception(std::basic_string<char_t> what) : std::exception(), m_what(what) {};
+    basic_exception(std::basic_string<char_t> what) : std::exception(), m_what(what) {};
 
     /**
      * Creates the exception with no message.
      */
-    exception() : std::exception(), m_what() {};
+    basic_exception() : std::exception(), m_what() {};
 
     /**
      * See std::exception::what().
@@ -78,9 +78,9 @@ private:
  * syntax errors).
  */
 template<typename char_t>
-class command_error: public exception<char_t> {
+class command_error: public basic_exception<char_t> {
 public:
-    using exception<char_t>::exception;
+    using basic_exception<char_t>::basic_exception;
 };
 
 /**
@@ -118,7 +118,7 @@ public:
  * basic_argument.
  */
 template<typename char_t>
-class argument_error : public exception<char_t> {
+class argument_error : public basic_exception<char_t> {
 protected:
     /** Copy of the basic_argument involved in the error */
     std::unique_ptr<basic_argument<char_t>> m_arg;
@@ -232,7 +232,7 @@ public:
  * Exception class raised when an basic_argument constraint is not satisfied.
  */
 template<typename char_t>
-class constraint_error : public exception<char_t> {
+class constraint_error : public basic_exception<char_t> {
 public:
     /**
      * Creates the exception with a reason for a constraint failure, and the

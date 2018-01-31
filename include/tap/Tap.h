@@ -463,4 +463,7 @@ namespace TAP {
 	using argument_constraint = basic_argument_constraint<char, CType>;
 	template<constraint_type CType>
 	using wargument_constraint = basic_argument_constraint<wchar_t, CType>;
+
+	using exception = basic_exception<char>;
+	using wexception = basic_exception<wchar_t>;
 }

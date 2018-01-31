@@ -24,18 +24,18 @@ namespace TAP {
 
 template<typename char_t>
 inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg) :
-    exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage()),
+        basic_exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage()),
     m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
 inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg, const std::basic_string<char_t>& reason) :
-    exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage() + widen_const<char_t>(' ') + reason),
+        basic_exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage() + widen_const<char_t>(' ') + reason),
     m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
-inline constraint_error<char_t>::constraint_error(const std::basic_string<char_t>& reason, const std::vector<const base_argument<char_t>*>& args) : exception<char_t>() {
+inline constraint_error<char_t>::constraint_error(const std::basic_string<char_t>& reason, const std::vector<const base_argument<char_t>*>& args) : basic_exception<char_t>() {
     this->m_what = reason;
     bool first = true;
     for(auto arg: args) {
