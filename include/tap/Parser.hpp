@@ -43,17 +43,18 @@ namespace TAP {
  * parsing is similar to that of GNU get_opt_long(), except Perl like arguments
  * are not supported.
  */
+template<typename char_t>
 class ArgumentParser {
 protected:
     /** Collection ArgumentSets (groups) */
-    std::vector<ArgumentSet> m_argSets;
+    std::vector<ArgumentSet<char_t>> m_argSets;
 
     /** Stored argument constraints */
-    ArgumentSet m_constraints;
+    ArgumentSet<char_t> m_constraints;
 
     /** Program name as displayed in help text. If not set explicitly, will use
      * the first argument of the parse function */
-    std::string m_programName;
+    std::basic_string<char_t> m_programName;
 public:
     /**
      * Construct a new ArgumentParser. The given list of Arguments is added to
@@ -75,7 +76,7 @@ public:
      * is used instead.
      * @return Reference to this ArgumentParser
      */
-    ArgumentParser& program_name(const std::string& programName) {
+    ArgumentParser& program_name(const std::basic_string<char_t>& programName) {
         m_programName = programName;
         return *this;
     }
@@ -84,7 +85,7 @@ public:
      * Returns the program name.
      * @return Program name
      */
-    const std::string& program_name() const {
+    const std::basic_string<char_t>& program_name() const {
         return m_programName;
     }
 
@@ -109,7 +110,7 @@ public:
      * @param argSet ArgumentSet to add
      * @return Reference to this ArgumentParser
      */
-    ArgumentParser& add(ArgumentSet argSet);
+    ArgumentParser& add(ArgumentSet<char_t> argSet);
 
     /**
      * Add the given constraint, to the parser. Constraints are not shown in
@@ -128,8 +129,8 @@ public:
      * @param flag Flag to search Argument by
      * @return The Argument that matches the flag
      */
-    const Argument& operator[](char flag) const {
-        const Argument* arg = findArg(flag);
+    const Argument<char_t>& operator[](char_t flag) const {
+        auto arg = findArg(flag);
         if (arg == nullptr) {
             throw std::out_of_range("Argument not found");
         }
@@ -142,8 +143,8 @@ public:
      * @param name Name to search Argument by
      * @return The Argument that matches the name
      */
-    const Argument& operator[](const std::string& name) const {
-        const Argument* arg = findArg(name);
+    const Argument<char_t>& operator[](const std::basic_string<char_t>& name) const {
+        auto arg = findArg(name);
         if (arg == nullptr) {
             throw std::out_of_range("Argument not found");
         }
@@ -155,7 +156,7 @@ public:
      * and a list of accepted arguments with their descriptions.
      * @return A string with help text.
      */
-    std::string help() const;
+    std::basic_string<char_t> help() const;
 
     /**
      * Parses the given arguments as they are presented on main() (see the
@@ -166,7 +167,7 @@ public:
      * @param argv Program arguments. The first item is expected to be the
      *             program invocation name
      */
-    void parse(int argc, const char* const argv[]);
+    void parse(int argc, const char_t* const argv[]);
 
     /**
      * Parses the given argument vector (see the parsing rules in the
@@ -176,7 +177,7 @@ public:
      * @param argv Program arguments. This vector may be modified by this
      *             function
      */
-    void parse(std::vector<std::string> const& argv) const;
+    void parse(std::vector<std::basic_string<char_t>> const& argv) const;
 
 private:
     /**
@@ -186,18 +187,18 @@ private:
      * @return First matching argument that can be set, last matching argument
      *         if none can be set, or nullptr if no matching arguments
      */
-    const Argument* findArg() const;
+    const Argument<char_t>* findArg() const;
 
     /**
      * Find the argument matching the given parameter (see
      * Argument::matches()), either the first one that can be set, or the last
      * one that matches. Returns a null-pointer if not found.
-     * @param ident void, char or std::string to identify the argument to find
+     * @param ident void, char or std::basic_string<char_t> to identify the argument to find
      * @return First matching argument that can be set, last matching argument
      *         if none can be set, or nullptr if no matching arguments
      */
     template<typename Ident>
-    const Argument* findArg(Ident ident) const;
+    const Argument<char_t>* findArg(Ident ident) const;
 
     /**
      * Helper function to set the value of an Argument of which takes_value()
@@ -205,7 +206,7 @@ private:
      * @param arg Argument to set value to
      * @param value Value to set
      */
-    void set_arg_value(const Argument* arg, const std::string& value) const;
+    void set_arg_value(const Argument<char_t>* arg, const std::basic_string<char_t>& value) const;
 };
 
 }

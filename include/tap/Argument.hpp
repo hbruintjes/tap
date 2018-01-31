@@ -31,10 +31,12 @@ freely, subject to the following restrictions:
 
 namespace TAP {
 
+template<typename char_t>
 class Argument;
 
 /** Function pointer that is used by Argument::check(). */
-using ArgumentCheckFunc = std::function<void(const Argument&)>;
+template<typename char_t>
+using ArgumentCheckFunc = std::function<void(const Argument<char_t>&)>;
 
 /**
  * Simple argument class. Arguments are identified by a flag ('-a') or name
@@ -46,18 +48,19 @@ using ArgumentCheckFunc = std::function<void(const Argument&)>;
  * By default an argument is allowed to occur only once, but can be set to occur
  * an arbitrary amount of times.
  */
-class Argument: public BaseArgument {
+template<typename char_t>
+class Argument: public BaseArgument<char_t> {
 protected:
     /** Flags this arguments matches */
-    std::string m_flags;
+    std::basic_string<char_t> m_flags;
     /** Names this argument matches */
-    std::vector<std::string> m_names;
+    std::vector<std::basic_string<char_t>> m_names;
 
     /** True if used as positional argument */
     bool m_isPositional;
 
     /** Description or help text of argument */
-    std::string m_description;
+    std::basic_string<char_t> m_description;
 
     /** Minimum number of occurrences if argument is set */
     unsigned int m_min = 1;
@@ -68,7 +71,7 @@ protected:
     mutable std::shared_ptr<unsigned int> m_count;
 
     /** Callback for check */
-    ArgumentCheckFunc m_checkFunc = nullptr;
+    ArgumentCheckFunc<char_t> m_checkFunc = nullptr;
 
 #ifndef TAP_AUTOFLAG
     /**
@@ -76,7 +79,7 @@ protected:
      * for subclasses that accept values, such as ValuedArgument.
      * @param description Description of the argument (used in help text)
      */
-    Argument(std::string description) :
+    Argument(std::basic_string<char_t> description) :
             m_isPositional(true), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
     }
 #endif
@@ -92,7 +95,7 @@ public:
      * @param description Description of the argument, requires a flag or name
      *        to be defined
      */
-    Argument(std::string description) :
+    Argument(std::basic_string<char_t> description) :
             m_isPositional(true), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 
         parse_description();
@@ -109,7 +112,7 @@ public:
      * @param description Description of the argument (used in help text)
      * @param flag Flag identifier of this argument
      */
-    Argument(std::string description, char flag) :
+    Argument(std::basic_string<char_t> description, char_t flag) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -122,7 +125,7 @@ public:
      * @param description Description of the argument (used in help text)
      * @param name Name identifier of this argument
      */
-    Argument(std::string description, std::string name) :
+    Argument(std::basic_string<char_t> description, std::basic_string<char_t> name) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -136,7 +139,7 @@ public:
      * @param flag Flag identifier of this argument
      * @param name Name identifier of this argument
      */
-    Argument(std::string description, char flag, std::string name) :
+    Argument(std::basic_string<char_t> description, char_t flag, std::basic_string<char_t> name) :
             m_isPositional(false), m_description(std::move(description)), m_count(std::make_shared<unsigned int>(0)) {
 #ifdef TAP_AUTOFLAG
         parse_description();
@@ -175,7 +178,7 @@ public:
      * @param flag Flag alias of Argument
      * @return Reference to this argument
      */
-    Argument& alias(char flag) {
+    Argument& alias(char_t flag) {
         m_flags.insert(m_flags.end(), flag);
         return *this;
     }
@@ -185,7 +188,7 @@ public:
      * @param name Name alias of Argument
      * @return Reference to this argument
      */
-    Argument& alias(std::string name) {
+    Argument& alias(std::basic_string<char_t> name) {
         m_names.push_back(std::move(name));
         return *this;
     }
@@ -196,7 +199,7 @@ public:
      * @param name Name alias of Argument
      * @return Reference to this argument
      */
-    Argument& alias(char flag, std::string name) {
+    Argument& alias(char_t flag, std::basic_string<char_t> name) {
         m_flags.insert(m_flags.end(), flag);
         m_names.push_back(std::move(name));
         return *this;
@@ -206,7 +209,7 @@ public:
      * Returns the description of this argument. See also description(string).
      * @return Argument description
      */
-    const std::string& description() const {
+    const std::basic_string<char_t>& description() const {
         return m_description;
     }
 
@@ -214,7 +217,7 @@ public:
      * @param checkFunc Check function to use (see ArgumentCheckFunc)
      * @return Reference to this argument
      */
-    virtual Argument& check(ArgumentCheckFunc checkFunc) {
+    virtual Argument<char_t>& check(ArgumentCheckFunc<char_t> checkFunc) {
         m_checkFunc = checkFunc;
         return *this;
     }
@@ -242,8 +245,8 @@ public:
      * @return Either a pointer to this argument if positional, otherwise
      *         nullptr.
      */
-    bool matches(char flag) const {
-        for (char self_flag : m_flags) {
+    bool matches(char_t flag) const {
+        for (char_t self_flag : m_flags) {
             if (self_flag == flag) {
                 return true;
             }
@@ -258,8 +261,8 @@ public:
      * @return Either a pointer to this argument if positional, otherwise
      *         nullptr.
      */
-    bool matches(const std::string& name) const {
-        for (const std::string& self_name : m_names) {
+    bool matches(const std::basic_string<char_t>& name) const {
+        for (const std::basic_string<char_t>& self_name : m_names) {
             if (self_name == name) {
                 return true;
             }
@@ -275,8 +278,8 @@ public:
     }
 
     // Make public
-    using BaseArgument::set_required;
-    using BaseArgument::required;
+    using BaseArgument<char_t>::set_required;
+    using BaseArgument<char_t>::required;
 
     ///////////////////
     // Count operations
@@ -394,27 +397,27 @@ public:
     /**
      * See BaseArgument::usage()
      */
-    std::string usage() const override;
+    std::basic_string<char_t> usage() const override;
 
     /**
      * Print a string representation of this argument to the given stream. This
      * is usually represented in the first column of help text.
      * @return String representation.
      */
-    virtual std::string ident() const;
+    virtual std::basic_string<char_t> ident() const;
 
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() const & override {
-        return std::unique_ptr<BaseArgument>(new Argument(*this));
+    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
+        return std::unique_ptr<BaseArgument<char_t>>(new Argument(*this));
     }
 
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() && override {
-        return std::unique_ptr<BaseArgument>(new Argument(std::move(*this)));
+    std::unique_ptr<BaseArgument<char_t>> clone() && override {
+        return std::unique_ptr<BaseArgument<char_t>>(new Argument(std::move(*this)));
     }
 protected:
     /**
@@ -447,9 +450,9 @@ private:
         bool addFlag = false;
         bool addName = false;
         auto nameStart = m_description.begin();
-        std::vector<std::string::iterator> specialChars;
+        std::vector<typename std::basic_string<char_t>::iterator> specialChars;
         for (auto it = m_description.begin(); it != m_description.end(); ++it) {
-            char c = *it;
+            char_t c = *it;
             bool skip = false;
 
             if (addFlag) {
@@ -462,7 +465,7 @@ private:
             if (!isalnum(c) && addName) {
                 // Check if valid character for a name
                 if (it != nameStart) {
-                    alias( std::string(nameStart, it) );
+                    alias( std::basic_string<char_t>(nameStart, it) );
                     m_isPositional = false;
                 }
                 addName = false;
@@ -520,7 +523,7 @@ private:
             }
         }
         if (addName && nameStart != m_description.end()) {
-            alias(std::string(nameStart, m_description.end()));
+            alias(std::basic_string<char_t>(nameStart, m_description.end()));
         }
         // Remove the special characters
         for (auto it = specialChars.rbegin(); it != specialChars.rend(); it++) {
@@ -533,6 +536,7 @@ private:
 /**
  * Interface class for arguments that accept a value when takes_value() is true.
  */
+template<typename char_t>
 class ValueAcceptor {
 protected:
     ~ValueAcceptor() {}
@@ -542,7 +546,7 @@ public:
      * parameter is a string representing the value. See also Argument::set()
      * @param value The value to set, as a string
      */
-    virtual void set(const std::string& value) const = 0;
+    virtual void set(const std::basic_string<char_t>& value) const = 0;
 };
 
 }

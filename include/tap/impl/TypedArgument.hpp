@@ -35,16 +35,16 @@ namespace detail {
     /**
      * Stream value into storage, throws ArgException on failure.
      */
-    template<typename T>
-    inline bool setValue(const std::string& value, T& storage) {
-        std::istringstream iss(value);
+    template<typename char_t, typename T>
+    inline bool setValue(const std::basic_string<char_t>& value, T& storage) {
+        std::basic_istringstream<char_t> iss(value);
 #ifdef TAP_STREAMSAFE
         T local = storage;
         iss >> local;
 #else
         iss >> storage;
 #endif
-        if ( !iss || (iss.peek() != std::istringstream::traits_type::eof()) ) {
+        if ( !iss || (iss.peek() != std::basic_istringstream<char_t>::traits_type::eof()) ) {
             return false;
         }
 #ifdef TAP_STREAMSAFE
@@ -57,8 +57,8 @@ namespace detail {
      * Stream value into storage vector by appending as the last element, throws
      * ArgException on failure.
      */
-    template<typename T>
-    inline bool setValue(const std::string& value, std::vector<T>& storage) {
+    template<typename char_t, typename T>
+    inline bool setValue(const std::basic_string<char_t>& value, std::vector<T>& storage) {
         T local;
         if (!setValue(value, local)) {
             return false;
@@ -67,76 +67,82 @@ namespace detail {
         return true;
     }
 
+    //TODO: Fix specializations for string and bool
     /**
      * Assign value to storage string
      */
-    template<>
-    inline bool setValue<std::string>(const std::string& value, std::string& storage) {
+     /*
+    template<typename char_t>
+    inline bool setValue<char_t, std::basic_string<char_t>>(const std::basic_string<char_t>& value, std::basic_string<char_t>& storage) {
         storage = value;
         return true;
     }
+  */
 
     /**
      * Assign value to storage vector by appending as the last element.
      */
-    template<>
-    inline bool setValue< std::vector<std::string> >(const std::string& value, std::vector<std::string>& storage) {
+/*
+    template<typename char_t>
+    inline bool setValue< char_t, std::vector<std::basic_string<char_t>> >(const std::basic_string<char_t>& value, std::vector<std::basic_string<char_t>>& storage) {
         storage.push_back(value);
         return true;
     }
-
+*/
     /**
      * Placeholder for boolean assignment, this function should never be called.
      */
-    template<>
-    inline bool setValue<bool>(const std::string&, bool&) {
+/*
+    template<typename char_t>
+    inline bool setValue<char_t, bool>(const std::basic_string<char_t>&, bool&) {
         throw std::logic_error("Assigning value to unvalued argument");
     }
+    */
 }
 
-template<typename T, bool multi>
-inline void VariableArgument<T,multi>::set() const {
+template<typename char_t, typename T, bool multi>
+inline void VariableArgument<char_t, T, multi>::set() const {
     throw std::logic_error("Calling set() on valued argument");
 }
 
-template<typename T, bool multi>
-inline void VariableArgument<T,multi>::set(const std::string& value) const {
+template<typename char_t, typename T, bool multi>
+inline void VariableArgument<char_t, T, multi>::set(const std::basic_string<char_t>& value) const {
     // Load value
-    if (!detail::setValue(value, *TypedArgument<T,multi>::m_storage)) {
+    if (!detail::setValue(value, *TypedArgument<char_t, T, multi>::m_storage)) {
         throw argument_invalid_value(*this, value);
     }
     // Run any configured check function
-    TypedArgument<T, multi>::check();
+    TypedArgument<char_t, T, multi>::check();
     // Mark argument set
-    Argument::set();
+    Argument<char_t>::set();
 }
 
-template<typename T, bool multi>
-inline std::string VariableArgument<T,multi>::usage() const {
-    std::string usageStr;
-    if (!Argument::m_isPositional) {
-        if (Argument::m_flags.length() > 0u) {
+template<typename char_t, typename T, bool multi>
+inline std::basic_string<char_t> VariableArgument<char_t, T, multi>::usage() const {
+    std::basic_string<char_t> usageStr;
+    if (!Argument<char_t>::m_isPositional) {
+        if (Argument<char_t>::m_flags.length() > 0u) {
             // Print first flag only, aliases generally not needed
-            usageStr = std::string(flagStart) + Argument::m_flags[0];
+            usageStr = std::basic_string<char_t>(flagStart) + Argument<char_t>::m_flags[0];
         } else {
-            usageStr = std::string(nameStart) + Argument::m_names[0];
+            usageStr = std::basic_string<char_t>(nameStart) + Argument<char_t>::m_names[0];
         }
 
         usageStr += " ";
     }
     usageStr += m_valueName;
 
-    if (Argument::m_isPositional && Argument::m_max != 1) {
+    if (Argument<char_t>::m_isPositional && Argument<char_t>::m_max != 1) {
         usageStr += "...";
     }
 
     return usageStr;
 }
 
-template<typename T, bool multi>
-inline std::string VariableArgument<T,multi>::ident() const {
-    if (!Argument::m_isPositional) {
-        return Argument::ident();
+template<typename char_t, typename T, bool multi>
+inline std::basic_string<char_t> VariableArgument<char_t, T, multi>::ident() const {
+    if (!Argument<char_t>::m_isPositional) {
+        return Argument<char_t>::ident();
     } else {
         // Identified by just the value name
         return m_valueName;

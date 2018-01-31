@@ -70,6 +70,7 @@ public:
 /**
  * Exception class raised when an unknown argument is encountered.
  */
+template<typename char_t>
 class unknown_argument : public command_error {
 public:
     /**
@@ -83,7 +84,7 @@ public:
      * Creates the exception for flag arguments.
      * @param flag The unknown flag
      */
-    unknown_argument(char flag) :
+    unknown_argument(char_t flag) :
         command_error(std::string("The flag argument ") + flag + " is unknown") {
     }
 
@@ -100,10 +101,11 @@ public:
  * Exception class raised when an error occurs verifying a command line
  * argument.
  */
+template<typename char_t>
 class argument_error : public exception {
 protected:
     /** Copy of the argument involved in the error */
-    std::unique_ptr<Argument> m_arg;
+    std::unique_ptr<Argument<char_t>> m_arg;
 
 public:
     /**
@@ -111,20 +113,20 @@ public:
      * reason.
      * @param arg The argument with an error
      */
-    argument_error(const Argument& arg);
+    argument_error(const Argument<char_t>& arg);
 
     /**
      * Creates the exception for the given argument, with a specified reason.
      * @param arg The argument with an error
      * @param reason The reason of the error
      */
-    argument_error(const Argument& arg, const std::string& reason);
+    argument_error(const Argument<char_t>& arg, const std::string& reason);
 
     /**
      * Returns the argument triggering the error.
      * @return The argument triggering the error
      */
-    const Argument& arg() const {
+    const Argument<char_t>& arg() const {
         return *m_arg;
     }
 };
@@ -133,7 +135,8 @@ public:
  * Exception class raised when an argument is used an incorrect amount of
  * times.
  */
-class argument_count_mismatch : public argument_error {
+template<typename char_t>
+class argument_count_mismatch : public argument_error<char_t> {
 public:
     /**
      * Creates the exception for the given argument, with the number of
@@ -143,19 +146,19 @@ public:
      * @param count The number of times the argument occurred
      * @param expected The number of times the argument was expected to occur
      */
-    argument_count_mismatch(const Argument& arg, unsigned int count, unsigned int expected) :
-        argument_error(arg) {
+    argument_count_mismatch(const Argument<char_t>& arg, unsigned int count, unsigned int expected) :
+        argument_error<char_t>(arg) {
         if (count < expected) {
             if (expected > 1) {
-                m_what += " is required to occur at least " + std::to_string(expected) + " times";
+                argument_error<char_t>::m_what += " is required to occur at least " + std::to_string(expected) + " times";
             } else {
-                m_what += " is required";
+                argument_error<char_t>::m_what += " is required";
             }
         } else {
             if (expected > 1) {
-                m_what += " can occur at most " + std::to_string(expected) + " times";
+                argument_error<char_t>::m_what += " can occur at most " + std::to_string(expected) + " times";
             } else {
-                m_what += " can only be set once";
+                argument_error<char_t>::m_what += " can only be set once";
             }
         }
     }
@@ -164,15 +167,16 @@ public:
 /**
  * Exception class raised when an argument value is incorrect.
  */
-class argument_invalid_value : public argument_error {
+template<typename char_t>
+class argument_invalid_value : public argument_error<char_t> {
 public:
     /**
      * Creates the exception for the given argument, with the incorrect value.
      * @param arg The argument with an error
      * @param value The value given on the command line
      */
-    argument_invalid_value(const Argument& arg, const std::string& value) :
-        argument_error(arg, std::string("does not accept the value ") + value) {
+    argument_invalid_value(const Argument<char_t>& arg, const std::string& value) :
+        argument_error<char_t>(arg, std::string("does not accept the value ") + value) {
     }
 };
 
@@ -180,33 +184,36 @@ public:
  * Exception class raised when an argument value is missing from the command
  * line.
  */
-class argument_missing_value : public argument_error {
+template<typename char_t>
+class argument_missing_value : public argument_error<char_t> {
 public:
     /**
      * Creates the exception for the given argument, which misses a value.
      */
-    argument_missing_value(const Argument& arg) :
-        argument_error(arg, "requires a value") {
+    argument_missing_value(const Argument<char_t>& arg) :
+        argument_error<char_t>(arg, "requires a value") {
     }
 };
 
 /**
  * Exception class raised when an argument value is given but not expected.
  */
-class argument_no_value : public argument_error {
+template<typename char_t>
+class argument_no_value : public argument_error<char_t> {
 public:
     /**
      * Creates the exception for the given argument, which was given a value
      * but does not accept one.
      */
-    argument_no_value(const Argument& arg) :
-        argument_error(arg, "does not accept a value") {
+    argument_no_value(const Argument<char_t>& arg) :
+        argument_error<char_t>(arg, "does not accept a value") {
     }
 };
 
 /**
  * Exception class raised when an argument constraint is not satisfied.
  */
+template<typename char_t>
 class constraint_error : public exception {
 public:
     /**
@@ -215,6 +222,6 @@ public:
      * @param reason Reason of failure
      * @param args List of arguments that caused the failure
      */
-    constraint_error(const std::string& reason, const std::vector<const BaseArgument*>& args);
+    constraint_error(const std::string& reason, const std::vector<const BaseArgument<char_t>*>& args);
 };
 }

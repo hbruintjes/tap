@@ -22,17 +22,20 @@ freely, subject to the following restrictions:
 
 namespace TAP {
 
-inline argument_error::argument_error(const Argument& arg) :
+template<typename char_t>
+inline argument_error<char_t>::argument_error(const Argument<char_t>& arg) :
     exception(std::string("Argument ") + arg.usage()),
-    m_arg(new Argument(arg)) {
+    m_arg(new Argument<char_t>(arg)) {
 }
 
-inline argument_error::argument_error(const Argument& arg, const std::string& reason) :
+template<typename char_t>
+inline argument_error<char_t>::argument_error(const Argument<char_t>& arg, const std::string& reason) :
     exception(std::string("Argument ") + arg.usage() + " " + reason),
-    m_arg(new Argument(arg)) {
+    m_arg(new Argument<char_t>(arg)) {
 }
 
-inline constraint_error::constraint_error(const std::string& reason, const std::vector<const BaseArgument*>& args) : exception() {
+template<typename char_t>
+inline constraint_error<char_t>::constraint_error(const std::string& reason, const std::vector<const BaseArgument<char_t>*>& args) : exception() {
     m_what = reason;
     bool first = true;
     for(auto arg: args) {

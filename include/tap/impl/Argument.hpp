@@ -22,10 +22,11 @@ freely, subject to the following restrictions:
 
 namespace TAP {
 
-inline void Argument::check_valid() const {
+template<typename char_t>
+inline void Argument<char_t>::check_valid() const {
     unsigned c = count();
     if (c == 0) {
-        if (m_required) {
+        if (BaseArgument<char_t>::m_required) {
             throw argument_count_mismatch(*this, c, 1);
         } else {
             return;
@@ -41,13 +42,14 @@ inline void Argument::check_valid() const {
 /**
  * See BaseArgument::usage()
  */
-inline std::string Argument::usage() const {
-    std::string usageStr;
+template<typename char_t>
+inline std::basic_string<char_t> Argument<char_t>::usage() const {
+    std::basic_string<char_t> usageStr;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        usageStr = std::string(flagStart) + m_flags[0];
+        usageStr = std::basic_string<char_t>(flagStart) + m_flags[0];
     } else if (m_names.size() > 0u) {
-        usageStr = std::string(nameStart) + m_names[0];
+        usageStr = std::basic_string<char_t>(nameStart) + m_names[0];
     } else {
         // else positional, needs an override
         throw std::logic_error("Base usage() called on positional argument");
@@ -61,11 +63,12 @@ inline std::string Argument::usage() const {
  * is usually represented in the first column of help text.
  * @return String representation.
  */
-inline std::string Argument::ident() const {
-    std::string ident;
+template<typename char_t>
+inline std::basic_string<char_t> Argument<char_t>::ident() const {
+    std::basic_string<char_t> ident;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        ident += std::string(flagStart) + m_flags[0];
+        ident += std::basic_string<char_t>(flagStart) + m_flags[0];
     }
 
     if (m_names.size() > 0u) {
@@ -73,7 +76,7 @@ inline std::string Argument::ident() const {
         if (m_flags.length() > 0u) {
             ident += ", ";
         }
-        ident += std::string(nameStart) + m_names[0];
+        ident += std::basic_string<char_t>(nameStart) + m_names[0];
     }
 
     // if positional, needs override

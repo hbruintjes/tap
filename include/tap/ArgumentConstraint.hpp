@@ -47,14 +47,14 @@ enum class ConstraintType {
  * Template parameter CType indicates the type of the constraint, for
  * possibilities see ConstraintType.
  */
-template<ConstraintType CType>
-class ArgumentConstraint: public BaseArgument {
+template<typename char_t, ConstraintType CType>
+class ArgumentConstraint: public BaseArgument<char_t> {
 protected:
     /** Sub-arguments to check */
-    std::vector< std::unique_ptr<BaseArgument> > m_args;
+    std::vector< std::unique_ptr<BaseArgument<char_t>> > m_args;
 
     /** Stored usage string */
-    std::string m_usageString;
+    std::basic_string<char_t> m_usageString;
 
 public:
     /**
@@ -69,7 +69,7 @@ public:
      * ArgumentConstraint copy constructor.
      */
     ArgumentConstraint(const ArgumentConstraint& other) :
-        BaseArgument(other), m_usageString(other.m_usageString) {
+        BaseArgument<char_t>(other), m_usageString(other.m_usageString) {
         for(auto const & arg: other.m_args) {
             m_args.emplace_back(std::move(arg->clone()));
         }
@@ -90,8 +90,9 @@ public:
      * ArgumentConstraint assignment operator.
      */
     ArgumentConstraint& operator=(ArgumentConstraint other) {
-        std::swap(m_args, other.m_args);
-        std::swap(m_usageString, other.m_usageString);
+        using std::swap;
+        swap(m_args, other.m_args);
+        swap(m_usageString, other.m_usageString);
         return *this;
     }
 
@@ -105,7 +106,7 @@ public:
      * @param arg Argument to append
      * @return Reference to this constraint
      */
-    ArgumentConstraint& operator+=(Argument& arg) {
+    ArgumentConstraint& operator+=(Argument<char_t>& arg) {
         add(arg);
         return *this;
     }
@@ -115,7 +116,7 @@ public:
      * @param arg Argument to append
      * @return Reference to this constraint
      */
-    ArgumentConstraint& operator+=(ArgumentConstraint<CType> const& other) {
+    ArgumentConstraint& operator+=(ArgumentConstraint<char_t, CType> const& other) {
         for(auto const & arg: other.m_args) {
             m_args.emplace_back(std::move(arg->clone()));
         }
@@ -133,7 +134,7 @@ public:
     /**
      * See BaseArgument::find_all_arguments()
      */
-    void find_all_arguments(std::vector<const Argument*>& collector) const override {
+    void find_all_arguments(std::vector<const Argument<char_t>*>& collector) const override {
         for(const auto& arg: m_args) {
             arg->find_all_arguments(collector);
         }
@@ -147,22 +148,22 @@ public:
     /**
      * See BaseArgument::usage()
      */
-    std::string usage() const override {
+    std::basic_string<char_t> usage() const override {
         return m_usageString;
     }
 
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() const & override {
-        return std::unique_ptr<BaseArgument>(new ArgumentConstraint(*this));
+    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
+        return std::unique_ptr<BaseArgument<char_t>>(new ArgumentConstraint(*this));
     }
 
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() && override {
-        return std::unique_ptr<BaseArgument>(new ArgumentConstraint(std::move(*this)));
+    std::unique_ptr<BaseArgument<char_t>> clone() && override {
+        return std::unique_ptr<BaseArgument<char_t>>(new ArgumentConstraint(std::move(*this)));
     }
 
 protected:
@@ -206,27 +207,28 @@ protected:
      * Returns a string for usage representation of sub-arguments.
      * @return String for usage representation of sub-arguments
      */
-    std::string usageArgument(const Argument& arg) const;
+    std::basic_string<char_t> usageArgument(const Argument<char_t>& arg) const;
 
     /**
      * Returns a string for usage representation of sub-arguments.
      * @return String for usage representation of sub-arguments
      */
     template<ConstraintType ACType>
-    std::string usageArgument(const ArgumentConstraint<ACType>& arg) const;
+    std::basic_string<char_t> usageArgument(const ArgumentConstraint<char_t, ACType>& arg) const;
 };
 
 /**
  * Simple set of arguments. Acts very much like ArgumentConstraint<Any>, but does
  * not modify arguments on insertion. Designed to be used by the parser.
  */
-class ArgumentSet : public ArgumentConstraint<ConstraintType::Any> {
+template<typename char_t>
+class ArgumentSet : public ArgumentConstraint<char_t, ConstraintType::Any> {
 protected:
     /** The name of this ArgumentSet */
-    std::string m_name;
+    std::basic_string<char_t> m_name;
 
     /** Cached arguments */
-    mutable std::vector<const Argument*> m_args;
+    mutable std::vector<const Argument<char_t>*> m_args;
 
     /** If true updates list of known arguments when retrieving them */
     bool m_updateArgs = true;
@@ -238,7 +240,7 @@ public:
      * @param args Arguments to add to the set initially
      */
     template<typename ... A>
-    ArgumentSet(const std::string& name, A&& ... args);
+    ArgumentSet(const std::basic_string<char_t>& name, A&& ... args);
 
     /**
      * ArgumentSet copy constructor.
@@ -270,7 +272,7 @@ public:
      * Get the name of this ArgumentSet.
      * @return string containing the name of this ArgumentSet
      */
-    const std::string& name() const {
+    const std::basic_string<char_t>& name() const {
         return m_name;
     }
 
@@ -279,10 +281,10 @@ public:
      * out.
      * @return Arguments contained in this ArgumentSet
      */
-    const std::vector<const Argument*>& args() const {
+    const std::vector<const Argument<char_t>*>& args() const {
         if (m_updateArgs) {
             m_args.clear();
-            find_all_arguments(m_args);
+            this->find_all_arguments(m_args);
         }
         return m_args;
     }
@@ -294,7 +296,7 @@ public:
      */
     template<typename ... A>
     ArgumentSet& add(A&& ... args) {
-        ArgumentConstraint<ConstraintType::Any>::add(std::forward<A>(args)...);
+        ArgumentConstraint<char_t, ConstraintType::Any>::add(std::forward<A>(args)...);
         m_updateArgs = true;
         return *this;
     }
@@ -302,15 +304,15 @@ public:
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() const & override {
-        return std::unique_ptr<BaseArgument>(new ArgumentSet(*this));
+    std::unique_ptr<BaseArgument<char_t>> clone() const & override {
+        return std::unique_ptr<BaseArgument<char_t>>(new ArgumentSet(*this));
     }
 
     /**
      * See BaseArgument::clone().
      */
-    std::unique_ptr<BaseArgument> clone() && override {
-        return std::unique_ptr<BaseArgument>(new ArgumentSet(std::move(*this)));
+    std::unique_ptr<BaseArgument<char_t>> clone() && override {
+        return std::unique_ptr<BaseArgument<char_t>>(new ArgumentSet(std::move(*this)));
     }
 };
 

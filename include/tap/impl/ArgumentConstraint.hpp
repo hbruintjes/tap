@@ -29,10 +29,10 @@ template<class T> using Temporary = T;
 /**
  * Helper struct to define constraint traits for ArgumentConstraint.
  */
-template<ConstraintType CType>
+template<typename char_t, ConstraintType CType>
 struct ConstraintTraits {
     /** String used to concatenate usage string of sub-arguments */
-    static constexpr const char* joinStr()  {
+    static constexpr const char_t* joinStr()  {
         return " ";
     }
 };
@@ -41,30 +41,30 @@ struct ConstraintTraits {
  * Helper struct to define constraint traits for ArgumentConstraint.
  * Specialized for ConstraintType::One.
  */
-template<>
-struct ConstraintTraits<ConstraintType::One> {
+template<typename char_t>
+struct ConstraintTraits<char_t, ConstraintType::One> {
     /** String used to concatenate usage string of sub-arguments */
-    static constexpr const char* joinStr()  {
+    static constexpr const char_t* joinStr()  {
         return " | ";
     }
 };
 
 }
 
-template<ConstraintType CType>
+template<typename char_t, ConstraintType CType>
 template<typename ... A>
-inline ArgumentConstraint<CType>::ArgumentConstraint(A&& ... arguments) :
-    BaseArgument(), m_usageString() {
+inline ArgumentConstraint<char_t, CType>::ArgumentConstraint(A&& ... arguments) :
+    BaseArgument<char_t>(), m_usageString() {
     //static_assert(CType != ConstraintType::One || sizeof...(arguments) > 1, "ConstraintType::One needs at least two arguments");
     add(std::forward<A>(arguments)...);
 }
 
-template<ConstraintType CType>
+template<typename char_t, ConstraintType CType>
 template<typename Arg>
-inline ArgumentConstraint<CType>& ArgumentConstraint<CType>::add(Arg&& arg) {
+inline ArgumentConstraint<char_t, CType>& ArgumentConstraint<char_t, CType>::add(Arg&& arg) {
     auto newArg = std::forward<Arg>(arg).clone();
     if (m_args.size() > 0) {
-        m_usageString += std::string(detail::ConstraintTraits<CType>::joinStr());
+        m_usageString += std::basic_string<char_t>(detail::ConstraintTraits<char_t, CType>::joinStr());
     }
 
     m_usageString += usageArgument(static_cast<const Arg&>(*newArg));
@@ -74,73 +74,89 @@ inline ArgumentConstraint<CType>& ArgumentConstraint<CType>::add(Arg&& arg) {
     return *this;
 }
 
-template<ConstraintType CType>
+template<typename char_t, ConstraintType CType>
 template<typename Arg, typename ... A>
-inline ArgumentConstraint<CType>& ArgumentConstraint<CType>::add(Arg&& arg, A&& ... args) {
+inline ArgumentConstraint<char_t, CType>& ArgumentConstraint<char_t, CType>::add(Arg&& arg, A&& ... args) {
    add(arg);
    add(args...);
 
     return *this;
 }
 
-template<>
-inline void ArgumentConstraint<ConstraintType::Imp>::check_valid() const {
-    bool checkNext = false;
-    BaseArgument* lastArg = nullptr;
-    for(auto const& arg: m_args) {
-        if (arg->is_set()) {
-            arg->check_valid();
-        }
-        if (checkNext && !arg->is_set()) {
-            throw constraint_error("Argument " + lastArg->usage() + " requires ", std::vector<const BaseArgument*>{arg.get()});
-        }
-        if (arg->is_set()) {
-            checkNext = true;
-        }
+namespace detail {
+    template<typename char_t, ConstraintType CType>
+    struct CheckValid;
 
-        lastArg = arg.get();
-    }
+    template<typename char_t>
+    struct CheckValid<char_t, ConstraintType::Imp> {
+        static void check_valid(std::vector< std::unique_ptr<BaseArgument<char_t>> > const& m_args) {
+            bool checkNext = false;
+            BaseArgument<char_t>* lastArg = nullptr;
+            for(auto const& arg: m_args) {
+                if (arg->is_set()) {
+                    arg->check_valid();
+                }
+                if (checkNext && !arg->is_set()) {
+                    throw constraint_error("Argument " + lastArg->usage() + " requires ", std::vector<const BaseArgument<char_t>*>{arg.get()});
+                }
+                if (arg->is_set()) {
+                    checkNext = true;
+                }
+
+                lastArg = arg.get();
+            }
+        }
+    };
+
+    template<typename char_t>
+    struct CheckValid<char_t, ConstraintType::One> {
+        static void check_valid(std::vector< std::unique_ptr<BaseArgument<char_t>> > const& m_args) {
+            unsigned int counter = 0;
+            for(auto const& arg: m_args) {
+                if (arg->is_set()) {
+                    arg->check_valid();
+                    ++counter;
+                }
+            }
+            if (counter != 1) {
+                std::vector<const BaseArgument<char_t>*> args;
+                for(auto const& arg: m_args) {
+                    // Copy to raw pointer vector
+                    args.push_back(arg.get());
+                }
+                throw constraint_error("Must set exactly one argument from ", args);
+            }
+        }
+    };
+
+    template<typename char_t>
+    struct CheckValid<char_t, ConstraintType::Any> {
+        static void check_valid(std::vector< std::unique_ptr<BaseArgument<char_t>> > const& m_args) {
+            std::vector<const BaseArgument<char_t>*> failed_args;
+            for(auto const& arg: m_args) {
+                if (arg->is_set() || arg->required()) {
+                    arg->check_valid();
+                }
+
+                if (arg->required() && !arg->is_set()) {
+                    failed_args.push_back(arg.get());
+                }
+            }
+
+            if (failed_args.size() > 0) {
+                throw constraint_error("The following requirements are missing: ", failed_args);
+            }
+        }
+    };
 }
 
-template<>
-inline void ArgumentConstraint<ConstraintType::One>::check_valid() const {
-    unsigned int counter = 0;
-    for(auto const& arg: m_args) {
-        if (arg->is_set()) {
-            arg->check_valid();
-            ++counter;
-        }
-    }
-    if (counter != 1) {
-        std::vector<const BaseArgument*> args;
-        for(auto const& arg: m_args) {
-            // Copy to raw pointer vector
-            args.push_back(arg.get());
-        }
-        throw constraint_error("Must set exactly one argument from ", args);
-    }
+template<typename char_t, ConstraintType CType>
+inline void ArgumentConstraint<char_t, CType>::check_valid() const {
+    detail::CheckValid<char_t, CType>::check_valid(m_args);
 }
 
-template<>
-inline void ArgumentConstraint<ConstraintType::Any>::check_valid() const {
-    std::vector<const BaseArgument*> failed_args;
-    for(auto const& arg: m_args) {
-        if (arg->is_set() || arg->required()) {
-            arg->check_valid();
-        }
-
-        if (arg->required() && !arg->is_set()) {
-            failed_args.push_back(arg.get());
-        }
-    }
-
-    if (failed_args.size() > 0) {
-        throw constraint_error("The following requirements are missing: ", failed_args);
-    }
-}
-
-template<ConstraintType CType>
-inline unsigned int ArgumentConstraint<CType>::count() const {
+template<typename char_t, ConstraintType CType>
+inline unsigned int ArgumentConstraint<char_t, CType>::count() const {
     for (auto const& arg : m_args) {
         if (arg->is_set()) {
             return 1;
@@ -149,15 +165,15 @@ inline unsigned int ArgumentConstraint<CType>::count() const {
     return 0;
 }
 
-template<ConstraintType CType>
-inline void ArgumentConstraint<CType>::diagnose_args() const {
-    for (auto const& arg : m_args) {
+template<typename char_t, ConstraintType CType>
+inline void ArgumentConstraint<char_t, CType>::diagnose_args() const {
+    for (auto const& arg : this->m_args) {
         arg->check_valid();
     }
 }
 
-template<ConstraintType CType>
-inline std::string ArgumentConstraint<CType>::usageArgument(const Argument& arg) const {
+template<typename char_t, ConstraintType CType>
+inline std::basic_string<char_t> ArgumentConstraint<char_t, CType>::usageArgument(const Argument<char_t>& arg) const {
     if (!arg.required() && (CType == ConstraintType::Any)) {
         return "[ " + arg.usage() + " ]";
     } else {
@@ -165,9 +181,9 @@ inline std::string ArgumentConstraint<CType>::usageArgument(const Argument& arg)
     }
 }
 
-template<ConstraintType CType>
+template<typename char_t, ConstraintType CType>
 template<ConstraintType ACType>
-inline std::string ArgumentConstraint<CType>::usageArgument(const ArgumentConstraint<ACType>& arg) const {
+inline std::basic_string<char_t> ArgumentConstraint<char_t, CType>::usageArgument(const ArgumentConstraint<char_t, ACType>& arg) const {
     bool paren = (
             (CType == ConstraintType::One) ||
             (CType == ConstraintType::Any && ACType != ConstraintType::Any) ||
@@ -183,10 +199,11 @@ inline std::string ArgumentConstraint<CType>::usageArgument(const ArgumentConstr
     }
 }
 
+template<typename char_t>
 template<typename ... A>
-ArgumentSet::ArgumentSet(const std::string& name, A&& ... args) :
-    ArgumentConstraint<ConstraintType::Any>(), m_name(name) {
-    set_required(false);
+ArgumentSet<char_t>::ArgumentSet(const std::basic_string<char_t>& name, A&& ... args) :
+    ArgumentConstraint<char_t, ConstraintType::Any>(), m_name(name) {
+    this->set_required(false);
     add(std::forward<A>(args)...);
 }
 

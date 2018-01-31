@@ -33,7 +33,8 @@ namespace TAP {
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::One operator
  */
-ArgumentConstraint<ConstraintType::One> operator^(Argument& left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::One operator.
@@ -42,7 +43,8 @@ ArgumentConstraint<ConstraintType::One> operator^(Argument& left, Argument& righ
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::One operator
  */
-ArgumentConstraint<ConstraintType::One> operator^(ArgumentConstraint<ConstraintType::One> left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::One> operator^(ArgumentConstraint<char_t, ConstraintType::One> left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::One operator.
@@ -51,7 +53,8 @@ ArgumentConstraint<ConstraintType::One> operator^(ArgumentConstraint<ConstraintT
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::One operator
  */
-ArgumentConstraint<ConstraintType::One> operator^(Argument& left, ArgumentConstraint<ConstraintType::One>& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::One> operator^(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::One>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Any operator.
@@ -60,7 +63,8 @@ ArgumentConstraint<ConstraintType::One> operator^(Argument& left, ArgumentConstr
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::One operator
  */
-ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Any operator.
@@ -69,7 +73,8 @@ ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, Argument& righ
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::Any operator
  */
-ArgumentConstraint<ConstraintType::Any> operator|(ArgumentConstraint<ConstraintType::Any> left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Any> operator|(ArgumentConstraint<char_t, ConstraintType::Any> left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Any operator.
@@ -78,7 +83,8 @@ ArgumentConstraint<ConstraintType::Any> operator|(ArgumentConstraint<ConstraintT
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::Any operator
  */
-ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, ArgumentConstraint<ConstraintType::Any>& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Any> operator|(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Any>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Imp operator.
@@ -87,7 +93,8 @@ ArgumentConstraint<ConstraintType::Any> operator|(Argument& left, ArgumentConstr
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Imp operator.
@@ -96,7 +103,8 @@ ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, Argument& righ
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::Imp> operator>(ArgumentConstraint<ConstraintType::Imp> left, Argument& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Imp> operator>(ArgumentConstraint<char_t, ConstraintType::Imp> left, Argument<char_t>& right);
 
 /**
  * Joins two arguments together using the ConstraintType::Imp operator.
@@ -105,52 +113,56 @@ ArgumentConstraint<ConstraintType::Imp> operator>(ArgumentConstraint<ConstraintT
  * @return An ArgumentConstraint containing the given arguments, using the
  *         ConstraintType::All operator
  */
-ArgumentConstraint<ConstraintType::Imp> operator>(Argument& left, ArgumentConstraint<ConstraintType::Imp>& right);
+template<typename char_t>
+ArgumentConstraint<char_t, ConstraintType::Imp> operator>(Argument<char_t>& left, ArgumentConstraint<char_t, ConstraintType::Imp>& right);
 
 /**
  * Makes an argument optional.
  * @param arg Argument to make optional
  * @return input Argument
  */
-Argument& operator-(Argument& arg);
+template<typename char_t>
+Argument<char_t>& operator-(Argument<char_t>& arg);
 
 /**
  * Makes an argument constraint optional.
  * @param arg Argument to make optional
  * @return input Argument
  */
-template<ConstraintType CType>
-ArgumentConstraint<CType>& operator-(ArgumentConstraint<CType>& arg);
+template<typename char_t, ConstraintType CType>
+ArgumentConstraint<char_t, CType>& operator-(ArgumentConstraint<char_t, CType>& arg);
 
 /**
  * Makes an argument required.
  * @param arg Argument to make required
  * @return input Argument
  */
-Argument& operator+(Argument& arg);
+template<typename char_t>
+Argument<char_t>& operator+(Argument<char_t>& arg);
 
 /**
  * Makes an argument required.
  * @param arg Argument to make required
  * @return input Argument
  */
-Argument&& operator+(Argument&& arg);
+template<typename char_t>
+Argument<char_t>&& operator+(Argument<char_t>&& arg);
 
 /**
  * Makes an argument constraint required.
  * @param arg Argument constraint to make required
  * @return input Argument constraint
  */
-template<ConstraintType CType>
-ArgumentConstraint<CType>& operator+(ArgumentConstraint<CType>& arg);
+template<typename char_t, ConstraintType CType>
+ArgumentConstraint<char_t, CType>& operator+(ArgumentConstraint<char_t, CType>& arg);
 
 /**
  * Makes an argument constraint required.
  * @param arg Argument constraint to make required
  * @return input Argument constraint
  */
-template<ConstraintType CType>
-ArgumentConstraint<CType>&& operator+(ArgumentConstraint<CType>&& arg);
+template<typename char_t, ConstraintType CType>
+ArgumentConstraint<char_t, CType>&& operator+(ArgumentConstraint<char_t, CType>&& arg);
 
 }
 

@@ -25,51 +25,57 @@ freely, subject to the following restrictions:
 
 namespace TAP {
 
+template<typename char_t>
 template<typename... Args>
-inline ArgumentParser::ArgumentParser(Args&&... args) :
+inline ArgumentParser<char_t>::ArgumentParser(Args&&... args) :
     m_constraints("Constraints")
 {
     m_argSets.emplace_back("Arguments", args...);
 }
 
+template<typename char_t>
 template<typename... Args>
-inline ArgumentParser& ArgumentParser::addAll(Args&&... args) {
+inline ArgumentParser<char_t>& ArgumentParser<char_t>::addAll(Args&&... args) {
     detail::Temporary<char[]> { (
             add(std::forward<Args>(args))
             ,'0')..., '0' };
     return *this;
 }
 
+template<typename char_t>
 template<typename Arg>
-inline ArgumentParser& ArgumentParser::add(Arg&& arg) {
+inline ArgumentParser<char_t>& ArgumentParser<char_t>::add(Arg&& arg) {
     m_argSets[0].add(std::forward<Arg>(arg));
     return *this;
 }
 
-inline ArgumentParser& ArgumentParser::add(ArgumentSet argSet) {
+template<typename char_t>
+inline ArgumentParser<char_t>& ArgumentParser<char_t>::add(ArgumentSet<char_t> argSet) {
     m_argSets.emplace_back(std::move(argSet));
     return *this;
 }
 
+template<typename char_t>
 template<typename Arg>
-inline ArgumentParser& ArgumentParser::addConstraint(Arg&& constr) {
+inline ArgumentParser<char_t>& ArgumentParser<char_t>::addConstraint(Arg&& constr) {
     m_constraints.add(std::forward<Arg>(constr));
     return *this;
 }
 
-inline std::string ArgumentParser::help() const {
-    std::vector< std::pair<std::string, std::string> > infos;
-    std::string::size_type maxLength = 0;
+template<typename char_t>
+inline std::basic_string<char_t> ArgumentParser<char_t>::help() const {
+    std::vector< std::pair<std::basic_string<char_t>, std::basic_string<char_t>> > infos;
+    typename std::basic_string<char_t>::size_type maxLength = 0;
 
-    for(const ArgumentSet& argSet: m_argSets) {
-        for(const Argument* arg: argSet.args()) {
+    for(auto const& argSet: m_argSets) {
+        for(auto const& arg: argSet.args()) {
             maxLength = std::max(maxLength, arg->ident().length());
         }
     }
 
     maxLength += 2;
 
-    std::string helpText = "Usage: ";
+    std::basic_string<char_t> helpText = "Usage: ";
     if (m_programName.length() > 0) {
         helpText += m_programName + " ";
     }
@@ -81,15 +87,15 @@ inline std::string ArgumentParser::help() const {
         helpText += " " + it->usage();
     }
     helpText += '\n';
-    for(const ArgumentSet& argSet: m_argSets) {
+    for(auto const& argSet: m_argSets) {
         if (argSet.size() == 0) {
             continue;
         }
         helpText += "\n" + argSet.name() + ":\n";
-        for(const Argument* arg: argSet.args()) {
-            std::string ident = arg->ident();
+        for(auto const& arg: argSet.args()) {
+            std::basic_string<char_t> ident = arg->ident();
             helpText += "  " + ident;
-            helpText += std::string(maxLength - ident.length(), ' ');
+            helpText += std::basic_string<char_t>(maxLength - ident.length(), ' ');
             helpText += arg->description();
             helpText += "\n";
         }
@@ -98,23 +104,25 @@ inline std::string ArgumentParser::help() const {
     return helpText;
 }
 
-inline void ArgumentParser::parse(int argc, const char* const argv[]) {
+template<typename char_t>
+inline void ArgumentParser<char_t>::parse(int argc, const char_t* const argv[]) {
     // Push back all arguments in vector.
     // skip argv[0], it is the program name
     if (m_programName.length() == 0) {
         m_programName = argv[0];
     }
-    std::vector<std::string> args;
+    std::vector<std::basic_string<char_t>> args;
     for (int i = 1; i < argc; i++) {
         args.emplace_back(argv[i]);
     }
     parse(args);
 }
 
-inline const Argument* ArgumentParser::findArg() const {
-    const Argument* arg = nullptr;
-    for(const ArgumentSet& argSet: m_argSets) {
-        for (const Argument* checkArg: argSet.args()) {
+template<typename char_t>
+inline const Argument<char_t>* ArgumentParser<char_t>::findArg() const {
+    const Argument<char_t>* arg = nullptr;
+    for(auto const& argSet: m_argSets) {
+        for (auto const& checkArg: argSet.args()) {
             if (checkArg->matches()) {
                 arg = checkArg;
                 if (arg->can_set()) {
@@ -126,11 +134,12 @@ inline const Argument* ArgumentParser::findArg() const {
     return arg;
 }
 
+template<typename char_t>
 template<typename Ident>
-inline const Argument* ArgumentParser::findArg(Ident ident) const {
-    const Argument* arg = nullptr;
-    for(const ArgumentSet& argSet: m_argSets) {
-        for (const Argument* checkArg: argSet.args()) {
+inline const Argument<char_t>* ArgumentParser<char_t>::findArg(Ident ident) const {
+    const Argument<char_t>* arg = nullptr;
+    for(auto const& argSet: m_argSets) {
+        for (auto const& checkArg: argSet.args()) {
             if (checkArg->matches(ident)) {
                 arg = checkArg;
                 if (arg->can_set()) {
@@ -142,24 +151,25 @@ inline const Argument* ArgumentParser::findArg(Ident ident) const {
     return arg;
 }
 
-inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
+template<typename char_t>
+inline void ArgumentParser<char_t>::parse(std::vector<std::basic_string<char_t>> const& argv) const {
     bool noParse = false;
 
     for (auto it = argv.begin(); it != argv.end(); ++it) {
-        const std::string& arg = *it;
+        auto const& arg = *it;
 
-        const Argument* matchedArg = nullptr;
+        const Argument<char_t>* matchedArg = nullptr;
         if (arg == skip) {
             // After skip token, stop parsing
             noParse = true;
             continue;
         } else if (!noParse && arg.compare(0, strlen(nameStart), nameStart) == 0 && arg != nameStart) {
             // Named argument
-            std::string name;
+            std::basic_string<char_t> name;
 
             //Check if delimiter present, split if so
-            std::size_t found = arg.find(nameDelim);
-            bool hasDelim = (found != std::string::npos && found != 0);
+            auto found = arg.find(nameDelim);
+            bool hasDelim = (found != std::basic_string<char_t>::npos && found != 0);
             if (hasDelim) {
                 name = arg.substr(strlen(nameStart), found - strlen(nameStart));
             } else {
@@ -170,7 +180,7 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
             matchedArg = findArg(name);
 
             if (matchedArg == nullptr) {
-                throw unknown_argument(name);
+                throw unknown_argument<char_t>(name);
             }
 
             if (matchedArg->takes_value()) {
@@ -180,26 +190,26 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
                     ++it;
                     if (it == argv.end()) {
                         // Value expected but not given
-                        throw argument_missing_value(*matchedArg);
+                        throw argument_missing_value<char_t>(*matchedArg);
                     } else {
                         set_arg_value(matchedArg, *it);
                     }
                 }
             } else if (hasDelim) {
-                throw argument_no_value(*matchedArg);
+                throw argument_no_value<char_t>(*matchedArg);
             } else {
                 matchedArg->set();
             }
         } else if (!noParse && arg.compare(0, strlen(flagStart), flagStart) == 0 && arg != flagStart) {
             // flag argument. May be followed by other flags, or actual value
             // argument has to determine this
-            size_t flagIndex = strlen(flagStart);
+            auto flagIndex = strlen(flagStart);
             for (; flagIndex < arg.length(); ++flagIndex) {
                 matchedArg = findArg(arg[flagIndex]);
 
                 if (matchedArg == nullptr) {
                     // Lookup failure
-                    throw unknown_argument(arg[flagIndex]);
+                    throw unknown_argument<char_t>(arg[flagIndex]);
                 }
 
                 // Test if the flag takes a value, if not, grab next index
@@ -218,7 +228,7 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
                     ++it;
                     if (it == argv.end()) {
                         // Value expected but not given
-                        throw argument_missing_value(*matchedArg);
+                        throw argument_missing_value<char_t>(*matchedArg);
                     } else {
                         set_arg_value(matchedArg, *it);
                     }
@@ -232,13 +242,13 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
 
             // If still no argument, cannot do anything
             if (matchedArg == nullptr) {
-                throw unknown_argument();
+                throw unknown_argument<char_t>();
             }
 
             if (matchedArg->takes_value()) {
                 if (it == argv.end()) {
                     // Value expected but not given
-                    throw argument_missing_value(*matchedArg);
+                    throw argument_missing_value<char_t>(*matchedArg);
                 }
                 // Set the argument value
                 set_arg_value(matchedArg, *it);
@@ -248,7 +258,7 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
         }
     }
 
-    for(const ArgumentSet& argSet: m_argSets) {
+    for(auto const& argSet: m_argSets) {
 		// Some error in arguments, print diagnostics
 		argSet.check_valid();
     }
@@ -257,11 +267,12 @@ inline void ArgumentParser::parse(std::vector<std::string> const& argv) const {
 	m_constraints.check_valid();
 }
 
-inline void ArgumentParser::set_arg_value(const Argument* arg, const std::string& value) const {
+template<typename char_t>
+inline void ArgumentParser<char_t>::set_arg_value(const Argument<char_t>* arg, const std::basic_string<char_t>& value) const {
     if (!arg->takes_value()) {
         throw std::logic_error("Attempt to set value on non-valued argument");
     }
-    const ValueAcceptor* valueArg = dynamic_cast<const ValueAcceptor*>(arg);
+    auto valueArg = dynamic_cast<const ValueAcceptor<char_t>*>(arg);
     if (valueArg == nullptr) {
         throw std::logic_error("Requested value interface on non-valued argument");
     }

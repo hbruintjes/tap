@@ -31,12 +31,14 @@ freely, subject to the following restrictions:
 
 namespace TAP {
 
+template<typename char_t>
 class Argument;
 
 /**
  * Base argument class, used both by actual Argument classes and constraints
  * (ArgumentConstraint).
  */
+template<typename char_t>
 class BaseArgument {
 protected:
     /** True if the argument has to be set */
@@ -80,7 +82,7 @@ public:
      * vector.
      * @param collector Vector to store the arguments in
      */
-    virtual void find_all_arguments(std::vector<const Argument*>& collector) const = 0;
+    virtual void find_all_arguments(std::vector<const Argument<char_t>*>& collector) const = 0;
 
     /**
      * Boolean conversion operator (so you can do things like
@@ -139,7 +141,7 @@ public:
      * line
      * @return The usage string
      */
-    virtual std::string usage() const = 0;
+    virtual std::basic_string<char_t> usage() const = 0;
 
     /**
      * Make a clone of the BaseArgument. Returns a pointer which is owned by
