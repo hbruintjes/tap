@@ -47,9 +47,9 @@ inline std::basic_string<char_t> basic_argument<char_t>::usage() const {
     std::basic_string<char_t> usageStr;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        usageStr = std::basic_string<char_t>(flagStart) + m_flags[0];
+        usageStr = widen_const<char_t>(flagStart) + m_flags[0];
     } else if (m_names.size() > 0u) {
-        usageStr = std::basic_string<char_t>(nameStart) + m_names[0];
+        usageStr = widen_const<char_t>(nameStart) + m_names[0];
     } else {
         // else positional, needs an override
         throw std::logic_error("Base usage() called on positional basic_argument");
@@ -68,15 +68,15 @@ inline std::basic_string<char_t> basic_argument<char_t>::ident() const {
     std::basic_string<char_t> ident;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        ident += std::basic_string<char_t>(flagStart) + m_flags[0];
+        ident += widen_const<char_t>(flagStart) + m_flags[0];
     }
 
     if (m_names.size() > 0u) {
         // Print first name only, aliases generally not needed
         if (m_flags.length() > 0u) {
-            ident += ", ";
+            ident += widen_const<char_t>(", ");
         }
-        ident += std::basic_string<char_t>(nameStart) + m_names[0];
+        ident += widen_const<char_t>(nameStart) + m_names[0];
     }
 
     // if positional, needs override

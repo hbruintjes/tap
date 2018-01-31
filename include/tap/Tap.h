@@ -341,6 +341,9 @@ int main(int argc, const char* argv[]) {
 
 #pragma once
 
+#include <locale>
+#include <string>
+
 /**
  * @brief The main TAP namespace. Everything in the TAP library is part of this
  * namespace.
@@ -384,6 +387,35 @@ const char skip[] = TAP_SKIP;
 // If TAP_AUTOFLAG defined, special characters in the argument description will
 // be used to define flags and names. It has a runtime hit but looks fancy.
 //#define TAP_AUTOFLAG 1
+
+	namespace detail {
+		template<typename char_t, size_t N>
+		struct Converter {
+			static std::basic_string<char_t> widen(char const (&str)[N]) {
+				char_t buffer[N];
+				std::use_facet<std::ctype<char_t> >(std::locale()).widen(str, str+N, buffer);
+				return buffer;
+			}
+		};
+		template<size_t N>
+		struct Converter<char, N> {
+			static std::basic_string<char> widen(char const (&str)[N]) {
+				return str;
+			}
+		};
+	}
+	template<typename char_t, size_t N>
+	std::basic_string<char_t> widen_const(char const (&str)[N]) {
+		return detail::Converter<char_t, N>::widen(str);
+	}
+	template<typename char_t>
+	char_t widen_const(char const ch) {
+		return std::use_facet<std::ctype<char_t> >(std::locale()).widen(ch);
+	}
+	template<>
+	char widen_const<char>(char const ch) {
+		return ch;
+	}
 
 }
 

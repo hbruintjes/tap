@@ -24,26 +24,29 @@ freely, subject to the following restrictions:
 
 #pragma once
 
-#include <vector>
-#include <stdexcept>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
 
 namespace TAP {
 
 /**
  * Standard exception class for TAP. All TAP exceptions are derived from this.
  */
+template<typename char_t>
 class exception : public std::exception {
 protected:
     /** Description of the exception. See what(). */
-    std::string m_what;
+    std::basic_string<char_t> m_what;
+    mutable std::string m_whatNarrow;
 
 public:
     /**
      * Creates the exception with the given message.
      * @param what Exception details
      */
-    exception(std::string what) : std::exception(), m_what(what) {};
+    exception(std::basic_string<char_t> what) : std::exception(), m_what(what) {};
 
     /**
      * Creates the exception with no message.
@@ -54,7 +57,19 @@ public:
      * See std::exception::what().
      */
     const char* what() const noexcept override {
-        return m_what.c_str();
+        return narrow(m_what.c_str(), m_what.size());
+    }
+
+private:
+    template<typename char_tt>
+    std::enable_if_t<std::is_same<char, char_tt>::value, const char*> narrow(char_tt const* what, size_t size) const {
+        return what;
+    }
+    template<typename char_tt>
+    std::enable_if_t<!std::is_same<char, char_tt>::value, const char*> narrow(char_tt const* what, size_t size) const {
+        m_whatNarrow.resize(size, '\0');
+        std::use_facet<std::ctype<char_t> >(std::locale()).narrow(what, what+size, '?', m_whatNarrow.data());
+        return m_whatNarrow.c_str();
     }
 };
 
@@ -62,22 +77,23 @@ public:
  * Exception class for errors in the command line (such as unknown arguments or
  * syntax errors).
  */
-class command_error: public exception {
+template<typename char_t>
+class command_error: public exception<char_t> {
 public:
-    using exception::exception;
+    using exception<char_t>::exception;
 };
 
 /**
  * Exception class raised when an unknown basic_argument is encountered.
  */
 template<typename char_t>
-class unknown_argument : public command_error {
+class unknown_argument : public command_error<char_t> {
 public:
     /**
      * Creates the exception for positional arguments.
      */
     unknown_argument() :
-        command_error("No positional arguments are supported") {
+        command_error<char_t>(widen_const<char_t>("No positional arguments are supported")) {
     }
 
     /**
@@ -85,15 +101,15 @@ public:
      * @param flag The unknown flag
      */
     unknown_argument(char_t flag) :
-        command_error(std::string("The flag basic_argument ") + flag + " is unknown") {
+        command_error<char_t>(widen_const<char_t>("The flag basic_argument ") + flag + widen_const<char_t>(" is unknown")) {
     }
 
     /**
      * Creates the exception for name arguments.
      * @param name The unknown name
      */
-    unknown_argument(std::string name) :
-        command_error(std::string("The named basic_argument ") + name + " is unknown") {
+    unknown_argument(std::basic_string<char_t> name) :
+        command_error<char_t>(widen_const<char_t>("The named basic_argument ") + name + widen_const<char_t>(" is unknown")) {
     }
 };
 
@@ -102,7 +118,7 @@ public:
  * basic_argument.
  */
 template<typename char_t>
-class argument_error : public exception {
+class argument_error : public exception<char_t> {
 protected:
     /** Copy of the basic_argument involved in the error */
     std::unique_ptr<basic_argument<char_t>> m_arg;
@@ -120,7 +136,7 @@ public:
      * @param arg The basic_argument with an error
      * @param reason The reason of the error
      */
-    argument_error(const basic_argument<char_t>& arg, const std::string& reason);
+    argument_error(const basic_argument<char_t>& arg, const std::basic_string<char_t>& reason);
 
     /**
      * Returns the basic_argument triggering the error.
@@ -147,18 +163,20 @@ public:
      * @param expected The number of times the basic_argument was expected to occur
      */
     argument_count_mismatch(const basic_argument<char_t>& arg, unsigned int count, unsigned int expected) :
-        argument_error<char_t>(arg) {
+            argument_error<char_t>(arg) {
+        std::basic_ostringstream<char_t> ss;
+        ss << expected;
         if (count < expected) {
             if (expected > 1) {
-                argument_error<char_t>::m_what += " is required to occur at least " + std::to_string(expected) + " times";
+                argument_error<char_t>::m_what += widen_const<char_t>(" is required to occur at least ") + ss.str() + widen_const<char_t>(" times");
             } else {
-                argument_error<char_t>::m_what += " is required";
+                argument_error<char_t>::m_what += widen_const<char_t>(" is required");
             }
         } else {
             if (expected > 1) {
-                argument_error<char_t>::m_what += " can occur at most " + std::to_string(expected) + " times";
+                argument_error<char_t>::m_what += widen_const<char_t>(" can occur at most ") + ss.str() + widen_const<char_t>(" times");
             } else {
-                argument_error<char_t>::m_what += " can only be set once";
+                argument_error<char_t>::m_what += widen_const<char_t>(" can only be set once");
             }
         }
     }
@@ -175,8 +193,8 @@ public:
      * @param arg The basic_argument with an error
      * @param value The value given on the command line
      */
-    argument_invalid_value(const basic_argument<char_t>& arg, const std::string& value) :
-        argument_error<char_t>(arg, std::string("does not accept the value ") + value) {
+    argument_invalid_value(const basic_argument<char_t>& arg, const std::basic_string<char_t>& value) :
+        argument_error<char_t>(arg, widen_const<char_t>("does not accept the value ") + value) {
     }
 };
 
@@ -191,7 +209,7 @@ public:
      * Creates the exception for the given basic_argument, which misses a value.
      */
     argument_missing_value(const basic_argument<char_t>& arg) :
-        argument_error<char_t>(arg, "requires a value") {
+        argument_error<char_t>(arg, widen_const<char_t>("requires a value")) {
     }
 };
 
@@ -206,7 +224,7 @@ public:
      * but does not accept one.
      */
     argument_no_value(const basic_argument<char_t>& arg) :
-        argument_error<char_t>(arg, "does not accept a value") {
+        argument_error<char_t>(arg, widen_const<char_t>("does not accept a value")) {
     }
 };
 
@@ -214,7 +232,7 @@ public:
  * Exception class raised when an basic_argument constraint is not satisfied.
  */
 template<typename char_t>
-class constraint_error : public exception {
+class constraint_error : public exception<char_t> {
 public:
     /**
      * Creates the exception with a reason for a constraint failure, and the
@@ -222,6 +240,6 @@ public:
      * @param reason Reason of failure
      * @param args List of arguments that caused the failure
      */
-    constraint_error(const std::string& reason, const std::vector<const base_argument<char_t>*>& args);
+    constraint_error(const std::basic_string<char_t>& reason, const std::vector<const base_argument<char_t>*>& args);
 };
 }

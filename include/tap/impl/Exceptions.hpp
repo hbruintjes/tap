@@ -24,27 +24,27 @@ namespace TAP {
 
 template<typename char_t>
 inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg) :
-    exception(std::string("basic_argument ") + arg.usage()),
+    exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage()),
     m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
-inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg, const std::string& reason) :
-    exception(std::string("basic_argument ") + arg.usage() + " " + reason),
+inline argument_error<char_t>::argument_error(const basic_argument<char_t>& arg, const std::basic_string<char_t>& reason) :
+    exception<char_t>(widen_const<char_t>("basic_argument ") + arg.usage() + widen_const<char_t>(' ') + reason),
     m_arg(new basic_argument<char_t>(arg)) {
 }
 
 template<typename char_t>
-inline constraint_error<char_t>::constraint_error(const std::string& reason, const std::vector<const base_argument<char_t>*>& args) : exception() {
-    m_what = reason;
+inline constraint_error<char_t>::constraint_error(const std::basic_string<char_t>& reason, const std::vector<const base_argument<char_t>*>& args) : exception<char_t>() {
+    this->m_what = reason;
     bool first = true;
     for(auto arg: args) {
         if (!first) {
-            m_what += " ";
+            this->m_what += widen_const<char_t>(' ');
         } else {
             first = false;
         }
-        m_what += arg->usage();
+        this->m_what += arg->usage();
     }
 }
 

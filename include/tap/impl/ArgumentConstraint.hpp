@@ -32,8 +32,8 @@ template<class T> using Temporary = T;
 template<typename char_t, constraint_type CType>
 struct ConstraintTraits {
     /** String used to concatenate usage string of sub-arguments */
-    static constexpr const char_t* joinStr()  {
-        return " ";
+    static std::basic_string<char_t> joinStr()  {
+        return widen_const<char_t>(" ");
     }
 };
 
@@ -44,8 +44,8 @@ struct ConstraintTraits {
 template<typename char_t>
 struct ConstraintTraits<char_t, constraint_type::One> {
     /** String used to concatenate usage string of sub-arguments */
-    static constexpr const char_t* joinStr()  {
-        return " | ";
+    static std::basic_string<char_t> joinStr()  {
+        return widen_const<char_t>(" | ");
     }
 };
 
@@ -144,7 +144,7 @@ namespace detail {
             }
 
             if (failed_args.size() > 0) {
-                throw constraint_error("The following requirements are missing: ", failed_args);
+                throw constraint_error(widen_const<char_t>("The following requirements are missing: "), failed_args);
             }
         }
     };
@@ -175,7 +175,7 @@ inline void basic_argument_constraint<char_t, CType>::diagnose_args() const {
 template<typename char_t, constraint_type CType>
 inline std::basic_string<char_t> basic_argument_constraint<char_t, CType>::usageArgument(const basic_argument<char_t>& arg) const {
     if (!arg.required() && (CType == constraint_type::Any)) {
-        return "[ " + arg.usage() + " ]";
+        return widen_const<char_t>("[ ") + arg.usage() + widen_const<char_t>(" ]");
     } else {
         return arg.usage();
     }
@@ -190,10 +190,10 @@ inline std::basic_string<char_t> basic_argument_constraint<char_t, CType>::usage
             (ACType == constraint_type::One)
         );
     if (!arg.required() && (CType == constraint_type::Any && ACType != constraint_type::Any)) {
-        return "[ " + arg.usage() + " ]";
+        return widen_const<char_t>("[ ") + arg.usage() + widen_const<char_t>(" ]");
     }
     if (paren && arg.size() > 0) {
-        return "( " + arg.usage() + " )";
+        return widen_const<char_t>("( ") + arg.usage() + widen_const<char_t>(" )");
     } else {
         return arg.usage();
     }

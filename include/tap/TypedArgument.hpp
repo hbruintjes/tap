@@ -198,7 +198,7 @@ protected:
     using ST = typename typed_argument<char_t, T, multi>::ST;
 
     /** Name of the accepted value, used in the identifier */
-    std::basic_string<char_t> m_valueName = std::basic_string<char_t>("value");
+    std::basic_string<char_t> m_valueName = std::basic_string<char_t>(widen_const<char_t>("value"));
 
 public:
     /**

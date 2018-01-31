@@ -28,9 +28,9 @@ namespace TAP {
 template<typename char_t>
 template<typename... Args>
 inline basic_argument_parser<char_t>::basic_argument_parser(Args&&... args) :
-    m_constraints("Constraints")
+    m_constraints(widen_const<char_t>("Constraints"))
 {
-    m_argSets.emplace_back("arguments", args...);
+    m_argSets.emplace_back(widen_const<char_t>("arguments"), args...);
 }
 
 template<typename char_t>
@@ -75,29 +75,31 @@ inline std::basic_string<char_t> basic_argument_parser<char_t>::help() const {
 
     maxLength += 2;
 
-    std::basic_string<char_t> helpText = "Usage: ";
+    auto sp = widen_const<char_t>(' ');
+    auto nl = widen_const<char_t>('\n');
+    std::basic_string<char_t> helpText = widen_const<char_t>("Usage: ");
     if (m_programName.length() > 0) {
-        helpText += m_programName + " ";
+        helpText += m_programName + sp;
     }
     helpText += m_argSets[0].usage();
     for(auto it = (m_argSets.begin()+1); it != m_argSets.end(); ++it) {
         if (it->size() == 0) {
             continue;
         }
-        helpText += " " + it->usage();
+        helpText += sp + it->usage();
     }
-    helpText += '\n';
+    helpText += nl;
     for(auto const& argSet: m_argSets) {
         if (argSet.size() == 0) {
             continue;
         }
-        helpText += "\n" + argSet.name() + ":\n";
+        helpText += nl + argSet.name() + nl;
         for(auto const& arg: argSet.args()) {
             std::basic_string<char_t> ident = arg->ident();
-            helpText += "  " + ident;
+            helpText += sp + ident;
             helpText += std::basic_string<char_t>(maxLength - ident.length(), ' ');
             helpText += arg->description();
-            helpText += "\n";
+            helpText += nl;
         }
     }
 
@@ -159,11 +161,11 @@ inline void basic_argument_parser<char_t>::parse(std::vector<std::basic_string<c
         auto const& arg = *it;
 
         const basic_argument<char_t>* matchedArg = nullptr;
-        if (arg == skip) {
+        if (arg == widen_const<char_t>(skip)) {
             // After skip token, stop parsing
             noParse = true;
             continue;
-        } else if (!noParse && arg.compare(0, strlen(nameStart), nameStart) == 0 && arg != nameStart) {
+        } else if (!noParse && arg.compare(0, strlen(nameStart), widen_const<char_t>(nameStart)) == 0 && arg != widen_const<char_t>(nameStart)) {
             // Named basic_argument
             std::basic_string<char_t> name;
 
@@ -200,7 +202,7 @@ inline void basic_argument_parser<char_t>::parse(std::vector<std::basic_string<c
             } else {
                 matchedArg->set();
             }
-        } else if (!noParse && arg.compare(0, strlen(flagStart), flagStart) == 0 && arg != flagStart) {
+        } else if (!noParse && arg.compare(0, strlen(flagStart), widen_const<char_t>(flagStart)) == 0 && arg != widen_const<char_t>(flagStart)) {
             // flag basic_argument. May be followed by other flags, or actual value
             // basic_argument has to determine this
             auto flagIndex = strlen(flagStart);

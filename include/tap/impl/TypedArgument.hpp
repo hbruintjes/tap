@@ -123,17 +123,17 @@ inline std::basic_string<char_t> basic_variable_argument<char_t, T, multi>::usag
     if (!basic_argument<char_t>::m_isPositional) {
         if (basic_argument<char_t>::m_flags.length() > 0u) {
             // Print first flag only, aliases generally not needed
-            usageStr = std::basic_string<char_t>(flagStart) + basic_argument<char_t>::m_flags[0];
+            usageStr = widen_const<char_t>(flagStart) + basic_argument<char_t>::m_flags[0];
         } else {
-            usageStr = std::basic_string<char_t>(nameStart) + basic_argument<char_t>::m_names[0];
+            usageStr = widen_const<char_t>(nameStart) + basic_argument<char_t>::m_names[0];
         }
 
-        usageStr += " ";
+        usageStr += widen_const<char_t>(' ');
     }
     usageStr += m_valueName;
 
     if (basic_argument<char_t>::m_isPositional && basic_argument<char_t>::m_max != 1) {
-        usageStr += "...";
+        usageStr += widen_const<char_t>("...");
     }
 
     return usageStr;
