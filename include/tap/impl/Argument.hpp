@@ -27,15 +27,15 @@ inline void basic_argument<char_t>::check_valid() const {
     unsigned c = count();
     if (c == 0) {
         if (base_argument<char_t>::m_required) {
-            throw argument_count_mismatch(*this, c, 1);
+            throw argument_count_mismatch<char_t>(*this, c, 1);
         } else {
             return;
         }
     }
     if (c < m_min) {
-        throw argument_count_mismatch(*this, c, m_min);
+        throw argument_count_mismatch<char_t>(*this, c, m_min);
     } else if (c > m_max && m_max != 0) {
-        throw argument_count_mismatch(*this, c, m_max);
+        throw argument_count_mismatch<char_t>(*this, c, m_max);
     }
 }
 

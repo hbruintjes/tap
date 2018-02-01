@@ -144,7 +144,7 @@ namespace detail {
             }
 
             if (failed_args.size() > 0) {
-                throw constraint_error(widen_const<char_t>("The following requirements are missing: "), failed_args);
+                throw constraint_error<char_t>(widen_const<char_t>("The following requirements are missing: "), failed_args);
             }
         }
     };

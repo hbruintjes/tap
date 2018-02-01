@@ -109,7 +109,7 @@ template<typename char_t, typename T, bool multi>
 inline void basic_variable_argument<char_t, T, multi>::set(const std::basic_string<char_t>& value) const {
     // Load value
     if (!detail::setValue(value, *typed_argument<char_t, T, multi>::m_storage)) {
-        throw argument_invalid_value(*this, value);
+        throw argument_invalid_value<char_t>(*this, value);
     }
     // Run any configured check function
     typed_argument<char_t, T, multi>::check();
