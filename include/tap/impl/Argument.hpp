@@ -45,9 +45,9 @@ inline std::string Argument::usage() const {
     std::string usageStr;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        usageStr = std::string(flagStart) + m_flags[0];
+        usageStr = std::string(flagStart) + m_flags.at(0);
     } else if (m_names.size() > 0u) {
-        usageStr = std::string(nameStart) + m_names[0];
+        usageStr = std::string(nameStart) + m_names.at(0);
     } else {
         // else positional, needs an override
         throw std::logic_error("Base usage() called on positional argument");
@@ -65,7 +65,7 @@ inline std::string Argument::ident() const {
     std::string ident;
     if (m_flags.length() > 0u) {
         // Print first flag only, aliases generally not needed
-        ident += std::string(flagStart) + m_flags[0];
+        ident += std::string(flagStart) + m_flags.at(0);
     }
 
     if (m_names.size() > 0u) {
@@ -73,7 +73,7 @@ inline std::string Argument::ident() const {
         if (m_flags.length() > 0u) {
             ident += ", ";
         }
-        ident += std::string(nameStart) + m_names[0];
+        ident += std::string(nameStart) + m_names.at(0);
     }
 
     // if positional, needs override
