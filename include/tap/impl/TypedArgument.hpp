@@ -117,9 +117,9 @@ inline std::string VariableArgument<T,multi>::usage() const {
     if (!Argument::m_isPositional) {
         if (Argument::m_flags.length() > 0u) {
             // Print first flag only, aliases generally not needed
-            usageStr = std::string(flagStart) + Argument::m_flags[0];
+            usageStr = std::string(flagStart) + Argument::m_flags.at(0);
         } else {
-            usageStr = std::string(nameStart) + Argument::m_names[0];
+            usageStr = std::string(nameStart) + Argument::m_names.at(0);
         }
 
         usageStr += " ";
