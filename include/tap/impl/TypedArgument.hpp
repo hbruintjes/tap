@@ -102,7 +102,7 @@ inline void VariableArgument<T,multi>::set() const {
 template<typename T, bool multi>
 inline void VariableArgument<T,multi>::set(const std::string& value) const {
     // Load value
-    if (!detail::setValue(value, *TypedArgument<T,multi>::m_storage)) {
+    if (!detail::setValue(value, *m_storage)) {
         throw argument_invalid_value(*this, value);
     }
     // Run any configured check function
@@ -114,19 +114,19 @@ inline void VariableArgument<T,multi>::set(const std::string& value) const {
 template<typename T, bool multi>
 inline std::string VariableArgument<T,multi>::usage() const {
     std::string usageStr;
-    if (!Argument::m_isPositional) {
-        if (Argument::m_flags.length() > 0u) {
+    if (!this->m_isPositional) {
+        if (this->m_flags.length() > 0u) {
             // Print first flag only, aliases generally not needed
-            usageStr = std::string(flagStart) + Argument::m_flags[0];
+            usageStr = std::string(flagStart) + this->m_flags[0];
         } else {
-            usageStr = std::string(nameStart) + Argument::m_names[0];
+            usageStr = std::string(nameStart) + this->m_names[0];
         }
 
         usageStr += " ";
     }
     usageStr += m_valueName;
 
-    if (Argument::m_isPositional && Argument::m_max != 1) {
+    if (this->m_isPositional && this->m_max != 1) {
         usageStr += "...";
     }
 
@@ -135,7 +135,7 @@ inline std::string VariableArgument<T,multi>::usage() const {
 
 template<typename T, bool multi>
 inline std::string VariableArgument<T,multi>::ident() const {
-    if (!Argument::m_isPositional) {
+    if (!this->m_isPositional) {
         return Argument::ident();
     } else {
         // Identified by just the value name

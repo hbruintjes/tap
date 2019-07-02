@@ -345,6 +345,8 @@ void testValueArgument() {
 
     arg1.set("2");
     assert(arg1.value() == 2);
+    
+    arg1.usage();
 }
 
 void testValueArgumentDefault() {
@@ -440,7 +442,7 @@ void testValueArgumentCheck() {
     ValueArgument<int> arg1("", 'a');
     int checked = 0;
 
-    arg1.check([&checked] (const TypedArgument<int>&, const int& value) -> void {checked = value;});
+    arg1.check_typed([&checked] (const TypedArgument<int>&, const int& value) -> void {checked = value;});
 
     arg1.set("3");
     assert(checked == 3);
@@ -450,7 +452,7 @@ void testValueArgumentCheckExcept() {
     ValueArgument<int> arg1("", 'a');
     int checked = 0;
 
-    arg1.check(
+    arg1.check_typed(
             [&checked] (const TypedArgument<int>&, const int& value) -> void {
         if (value == 3) {
             throw TAP::exception("test 3");
@@ -583,201 +585,6 @@ void testSwitchArgumentMany() {
 
     arg1.set();
     assert(arg1 && !arg1.value());
-}
-
-/////////////////
-// Constraints //
-/////////////////
-void testArgumentConstraint() {
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    ArgumentConstraint<ConstraintType::None> argNone( arg1, arg2);
-
-    std::vector<const Argument*> collector;
-    argNone.find_all_arguments(collector);
-    assert(collector.size() == 2);
-
-    argNone.check_valid();
-}
-
-void testArgumentConstraintRequired() {
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    ArgumentConstraint<ConstraintType::None> argNone{arg1, arg2};
-
-    argNone.check_valid();
-
-    arg1.set();
-    try {
-        argNone.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-}
-
-void testArgumentConstraintSatisfy() {
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    ArgumentConstraint<ConstraintType::None> argNone( arg1, arg2);
-    ArgumentConstraint<ConstraintType::One>  argOne( arg1, arg2);
-    ArgumentConstraint<ConstraintType::Any>  argAny( arg1, arg2);
-    ArgumentConstraint<ConstraintType::All>  argAll( arg1, arg2);
-    argNone.set_required(); // this actually does nothing semantically
-    argOne.set_required();
-    argAny.set_required();
-    argAll.set_required();
-
-    argNone.check_valid();
-    try{
-        argOne.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    try{
-        argAll.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }    try{
-        argAny.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-
-    arg1.set();
-
-    try{
-        argNone.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    argOne.check_valid();
-    argAny.check_valid();
-    try{
-        argAll.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-
-    arg2.set();
-
-    try{
-        argNone.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    try{
-        argOne.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    argAny.check_valid();
-    argAll.check_valid();
-}
-
-void testArgumentConstraintNested() {
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    Argument arg3("", 'c');
-    ArgumentConstraint<ConstraintType::None> argNone2(arg3);
-    ArgumentConstraint<ConstraintType::None> argNone(arg1, arg2, argNone2);
-
-    std::vector<const Argument*> collector;
-    argNone.find_all_arguments(collector);
-    assert(collector.size() == 3);
-    collector.clear();
-    argNone2.find_all_arguments(collector);
-    assert(collector.size() == 1);
-}
-
-void testArgumentConstraintNestedSatisfy() {
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    Argument arg3("", 'c');
-    ArgumentConstraint<ConstraintType::All> argAll2(arg3);
-    ArgumentConstraint<ConstraintType::All> argAll(arg1, arg2, argAll2);
-    argAll.set_required();
-    argAll2.set_required();
-
-    try{
-        argAll.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    try{
-        argAll2.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-
-    arg1.set();
-
-    try{
-        argAll.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    try{
-        argAll2.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-
-    arg3.set();
-
-    try{
-        argAll.check_valid();
-        assert(false);
-    } catch (TAP::constraint_error& e) {
-        // Ok
-    }
-    argAll2.check_valid();
-
-    arg2.set();
-
-    argAll.check_valid();
-    argAll2.check_valid();
-
-}
-
-//#include <iostream>
-
-void testArgumentConstraintUsage() {
-    Argument arg0("", 'o');
-    Argument arg1("", 'a');
-    Argument arg2("", 'b');
-    Argument arg3("", 'c');
-    Argument arg4("", 'd');
-    Argument arg5("", 'e');
-    Argument arg6("", 'f');
-    Argument arg7("", 'g');
-    Argument arg8("", 'h');
-    Argument arg9("", 'i');
-    ArgumentConstraint<ConstraintType::None> carg1(+arg1, arg2);
-    ArgumentConstraint<ConstraintType::One> carg2(+arg3, arg4);
-    ArgumentConstraint<ConstraintType::Any> carg4(+arg7, arg8);
-    ArgumentConstraint<ConstraintType::All> carg5(+arg9, arg0);
-
-    ArgumentConstraint<ConstraintType::None> carg6(carg1, carg2, carg4, carg5);
-    ArgumentConstraint<ConstraintType::One> carg7(carg1, carg2, carg4, carg5);
-    ArgumentConstraint<ConstraintType::Any> carg9(carg1, carg2, carg4, carg5);
-    ArgumentConstraint<ConstraintType::All> carg0(carg1, carg2, carg4, carg5);
-
-    /*std::cout << carg6.usage() << '\n';
-    std::cout << carg7.usage() << '\n';
-    std::cout << carg9.usage() << '\n';
-    std::cout << carg0.usage() << '\n';*/
 }
 
 //////////////////
@@ -1258,13 +1065,6 @@ int main(int argc, const char** argv) {
     testSwitchArgumentExternalMany();
     testSwitchArgument();
     testSwitchArgumentMany();
-
-    testArgumentConstraint();
-    testArgumentConstraintRequired();
-    testArgumentConstraintSatisfy();
-    testArgumentConstraintNested();
-    testArgumentConstraintNestedSatisfy();
-    testArgumentConstraintUsage();
 
     testArgumentParserFlags();
     testArgumentParserFlagsJoin();

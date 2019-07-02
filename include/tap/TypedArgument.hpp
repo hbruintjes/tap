@@ -196,6 +196,7 @@ class VariableArgument : public TypedArgument<T, multi>, public ValueAcceptor {
 protected:
     /** Make TypedArgument::ST accessible. */
     using ST = typename TypedArgument<T, multi>::ST;
+    using TypedArgument<T, multi>::m_storage;
 
     /** Name of the accepted value, used in the identifier */
     std::string m_valueName = std::string("value");
@@ -399,6 +400,7 @@ class ValueArgument : public VariableArgument<T, multi> {
 protected:
     /** Make TypedArgument::ST accessible. */
     using ST = typename VariableArgument<T, multi>::ST;
+    using TypedArgument<T, multi>::m_storage;
 
     /** If the ValueArgument owns the variable storage, it is stored here */
     std::shared_ptr<ST> m_ownStorage;
@@ -413,7 +415,7 @@ public:
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
     ValueArgument(std::string description, U&&... params) :
         VariableArgument<T, multi>(std::move(description), new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<T, multi>::m_storage)
+        m_ownStorage(m_storage)
     {
     }
 
@@ -428,7 +430,7 @@ public:
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type>
     ValueArgument(std::string description, char flag, U&&... params) :
         VariableArgument<T, multi>(std::move(description), flag, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<T, multi>::m_storage)
+        m_ownStorage(m_storage)
     {
     }
 
@@ -443,7 +445,7 @@ public:
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
     ValueArgument(std::string description, const std::string& name, U&&... params) :
         VariableArgument<T, multi>(std::move(description), name, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<T, multi>::m_storage)
+        m_ownStorage(m_storage)
     {
     }
 
@@ -459,7 +461,7 @@ public:
     template<typename... U, typename = typename std::enable_if< std::is_constructible<ST, U...>::value >::type >
     ValueArgument(std::string description, char flag, const std::string& name, U&&... params) :
         VariableArgument<T, multi>(std::move(description), flag, name, new ST(std::forward<U>(params)...)),
-        m_ownStorage(TypedArgument<T, multi>::m_storage)
+        m_ownStorage(m_storage)
     {
     }
 
@@ -523,6 +525,7 @@ class ConstArgument: public TypedArgument<T, false> {
 protected:
     /** Constant to store */
     T m_value;
+    using TypedArgument<T, false>::m_storage;
 
 public:
 #ifdef TAP_AUTOFLAG
@@ -613,7 +616,7 @@ public:
      */
     void set() const override {
         Argument::set();
-        *TypedArgument<T, false>::m_storage = m_value;
+        *m_storage = m_value;
     }
 
     /**
@@ -641,6 +644,7 @@ class SwitchArgument : public TypedArgument<bool, false> {
 protected:
     /** If the SwitchArgument owns the variable storage, it is stored here */
     std::shared_ptr<bool> m_ownStorage;
+    using TypedArgument<bool, false>::m_storage;
 
 public:
     /////////////////
@@ -705,7 +709,7 @@ public:
      */
     SwitchArgument(std::string description) :
         TypedArgument<bool, false>(std::move(description), new bool()),
-        m_ownStorage(TypedArgument<bool, false>::m_storage) {
+        m_ownStorage(m_storage) {
     }
 #endif
 
@@ -717,7 +721,7 @@ public:
      */
     SwitchArgument(std::string description, char flag) :
         TypedArgument<bool, false>(std::move(description), flag, new bool()),
-        m_ownStorage(TypedArgument<bool, false>::m_storage) {
+        m_ownStorage(m_storage) {
     }
 
     /**
@@ -728,7 +732,7 @@ public:
      */
     SwitchArgument(std::string description, const std::string& name) :
         TypedArgument<bool, false>(std::move(description), name, new bool()),
-        m_ownStorage(TypedArgument<bool, false>::m_storage) {
+        m_ownStorage(m_storage) {
     }
 
     /**
@@ -740,7 +744,7 @@ public:
      */
     SwitchArgument(std::string description, char flag, const std::string& name) :
         TypedArgument<bool, false>(std::move(description), flag, name, new bool()),
-        m_ownStorage(TypedArgument<bool, false>::m_storage)  {
+        m_ownStorage(m_storage)  {
     }
 
     /**
@@ -780,7 +784,7 @@ public:
      */
     void set() const override {
         Argument::set();
-        *TypedArgument<bool, false>::m_storage = !*TypedArgument<bool, false>::m_storage;
+        *m_storage = !*m_storage;
     }
 
     /*
